@@ -6,3 +6,6 @@ Fitur Utama:
 •	Tabel daftar penelitian dan pengabdian masyarakat. <br>
 •	Laporan dan rekap kegiatan dosen (per dosen, per tahun, per jenis kegiatan). <br>
 •	Upload dokumen pendukung (proposal, laporan akhir, sertifikat). <br>
+
+Nama Aplikasi : AKSARA
+(Aplikasi Kegiatan Sains, Riset, dan Abdi Masyarakat)
