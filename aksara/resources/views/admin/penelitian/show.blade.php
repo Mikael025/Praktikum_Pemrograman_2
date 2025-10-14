@@ -1,0 +1,164 @@
+<x-layouts.admin>
+    <div class="space-y-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Detail Penelitian</h1>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Informasi lengkap penelitian dan dokumen pendukung</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('penelitian.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Kembali
+                </a>
+                <a href="{{ route('penelitian.edit', $penelitian) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    Edit
+                </a>
+            </div>
+        </div>
+
+        <!-- Info Dosen -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Informasi Dosen</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->user->name }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->user->email }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIDN</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->user->lecturerProfile->nidn ?? '—' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Penelitian -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Detail Penelitian</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->judul }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->tahun }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tim Peneliti</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->tim_peneliti }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sumber Dana</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->sumber_dana }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                    <div class="mt-1">
+                        <x-status-badge :status="$penelitian->status" />
+                    </div>
+                </div>
+                @if($penelitian->catatan_verifikasi)
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Verifikasi</label>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $penelitian->catatan_verifikasi }}</p>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Dokumen yang Diupload -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Dokumen yang Diupload</h2>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {{ $penelitian->documents->count() }} dokumen
+                </span>
+            </div>
+            
+            @if($penelitian->documents->count() > 0)
+                <div class="space-y-4">
+                    @foreach($penelitian->documents as $document)
+                        <x-document-item :document="$document" type="penelitian" />
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Belum ada dokumen</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Dosen belum mengupload dokumen pendukung untuk penelitian ini.</p>
+                </div>
+            @endif
+        </div>
+
+        <!-- Form Verifikasi Dokumen -->
+        @if($penelitian->status === 'menunggu_verifikasi')
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-emerald-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Verifikasi Dokumen</h2>
+            </div>
+            
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4 mb-6">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-yellow-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Perhatian</h3>
+                        <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                            Pastikan Anda telah memeriksa semua dokumen di atas sebelum melakukan verifikasi. 
+                            Setelah diverifikasi, status penelitian akan berubah dan tidak dapat diubah kembali.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Form Terima -->
+                <form action="{{ route('penelitian.verify', $penelitian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-green-800 dark:text-green-200 mb-3">Terima Dokumen</h3>
+                        <div class="mb-4">
+                            <label for="catatan_verify" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Verifikasi (Opsional)</label>
+                            <textarea id="catatan_verify" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Terima & Verifikasi
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Form Tolak -->
+                <form action="{{ route('penelitian.reject', $penelitian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200 mb-3">Tolak Dokumen</h3>
+                        <div class="mb-4">
+                            <label for="catatan_reject" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alasan Penolakan <span class="text-red-500">*</span></label>
+                            <textarea id="catatan_reject" name="catatan" rows="3" required placeholder="Jelaskan alasan penolakan dokumen..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Tolak Dokumen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
+    </div>
+</x-layouts.admin>
