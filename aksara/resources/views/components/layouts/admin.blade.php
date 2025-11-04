@@ -15,10 +15,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div class="min-h-screen bg-gray-100">
             <div class="flex min-h-screen">
                 <!-- Sidebar -->
-                <aside class="hidden md:flex md:w-64 md:flex-col bg-gray-900 text-gray-100">
+                <aside class="hidden md:flex md:w-64 md:flex-col bg-gray-900 text-gray-800">
                     <div class="h-16 flex items-center gap-3 px-4 border-b border-gray-800">
                         <img src="{{ asset('images/logoAksara.png') }}" alt="Logo" class="h-8 w-8">
                         <span class="text-lg font-semibold">Aksara</span>
@@ -28,7 +28,7 @@
                         <x-sidebar-link href="{{ route('penelitian.index') }}" :active="request()->routeIs('penelitian.*')">Penelitian</x-sidebar-link>
                         <x-sidebar-link href="{{ route('pengabdian.index') }}" :active="request()->routeIs('pengabdian.*')">Pengabdian Masyarakat</x-sidebar-link>
                         <div x-data="{ open: false }" class="relative">
-                            <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-700 hover:text-white">
                                 Informasi/Berita
                                 <svg class="ml-auto h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                             </button>
@@ -41,7 +41,7 @@
                         <x-sidebar-link href="#" :active="false">Laporan dan Rekap</x-sidebar-link>
                         <form method="POST" action="{{ route('logout') }}" class="pt-2">
                             @csrf
-                            <button type="submit" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Logout</button>
+                            <button type="submit" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-700 hover:text-white">Logout</button>
                         </form>
                     </nav>
                 </aside>
@@ -49,7 +49,7 @@
                 <!-- Main -->
                 <div class="flex-1 flex flex-col min-w-0">
                     <!-- Topbar -->
-                    <header class="h-16 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                    <header class="h-16 flex items-center justify-between px-4 bg-white border-b border-gray-200 sticky top-0 z-10">
                         <div class="flex items-center gap-2 md:hidden">
                             <!-- Placeholder for mobile menu (future) -->
                             <span class="text-gray-500">☰</span>
@@ -57,7 +57,7 @@
                         <div class="flex-1"></div>
                         <div class="flex items-center gap-3">
                             <img src="{{ asset('images/logoAksara.png') }}" alt="Logo" class="h-8 w-8">
-                            <span class="text-sm md:text-base font-medium text-gray-900 dark:text-gray-100">{{ auth()->user()->name ?? 'User' }}</span>
+                            <span class="text-sm md:text-base font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</span>
                         </div>
                     </header>
 

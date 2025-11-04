@@ -1,7 +1,7 @@
 <x-layouts.dosen>
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Edit Pengabdian</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Edit Pengabdian</h1>
             <div class="flex space-x-3">
                 <a href="{{ route('dosen.pengabdian.show', $pengabdian) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-700">
                     Lihat Detail
@@ -30,30 +30,30 @@
             @endif
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6">
             <form method="POST" action="{{ route('dosen.pengabdian.update', $pengabdian) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="space-y-6">
                     <div>
-                        <label for="judul" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul Pengabdian</label>
-                        <input type="text" name="judul" id="judul" value="{{ old('judul', $pengabdian->judul) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
+                        <label for="judul" class="block text-sm font-medium text-gray-700">Judul Pengabdian</label>
+                        <input type="text" name="judul" id="judul" value="{{ old('judul', $pengabdian->judul) }}" class="mt-1 block w-full rounded-md border-gray-300" required>
                         @error('judul')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="tahun" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun</label>
-                        <input type="number" name="tahun" id="tahun" value="{{ old('tahun', $pengabdian->tahun) }}" min="2020" max="2030" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
+                        <label for="tahun" class="block text-sm font-medium text-gray-700">Tahun</label>
+                        <input type="number" name="tahun" id="tahun" value="{{ old('tahun', $pengabdian->tahun) }}" min="2020" max="2030" class="mt-1 block w-full rounded-md border-gray-300" required>
                         @error('tahun')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="tim_pelaksana" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tim Pelaksana</label>
-                        <textarea name="tim_pelaksana" id="tim_pelaksana" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Masukkan nama-nama pelaksana, dipisahkan dengan koma" required>{{ old('tim_pelaksana', is_array($pengabdian->tim_pelaksana) ? implode(', ', $pengabdian->tim_pelaksana) : $pengabdian->tim_pelaksana) }}</textarea>
+                        <label for="tim_pelaksana" class="block text-sm font-medium text-gray-700">Tim Pelaksana</label>
+                        <textarea name="tim_pelaksana" id="tim_pelaksana" rows="3" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Masukkan nama-nama pelaksana, dipisahkan dengan koma" required>{{ old('tim_pelaksana', is_array($pengabdian->tim_pelaksana) ? implode(', ', $pengabdian->tim_pelaksana) : $pengabdian->tim_pelaksana) }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Contoh: Dr. John Doe, Prof. Jane Smith, M.Sc. Bob Wilson</p>
                         @error('tim_pelaksana')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -61,16 +61,16 @@
                     </div>
 
                     <div>
-                        <label for="lokasi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lokasi</label>
-                        <input type="text" name="lokasi" id="lokasi" value="{{ old('lokasi', $pengabdian->lokasi) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Contoh: Desa ABC, Kecamatan XYZ, Kabupaten DEF" required>
+                        <label for="lokasi" class="block text-sm font-medium text-gray-700">Lokasi</label>
+                        <input type="text" name="lokasi" id="lokasi" value="{{ old('lokasi', $pengabdian->lokasi) }}" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Contoh: Desa ABC, Kecamatan XYZ, Kabupaten DEF" required>
                         @error('lokasi')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="mitra" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mitra</label>
-                        <input type="text" name="mitra" id="mitra" value="{{ old('mitra', $pengabdian->mitra) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Contoh: Pemerintah Desa ABC, Karang Taruna, dll" required>
+                        <label for="mitra" class="block text-sm font-medium text-gray-700">Mitra</label>
+                        <input type="text" name="mitra" id="mitra" value="{{ old('mitra', $pengabdian->mitra) }}" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Contoh: Pemerintah Desa ABC, Karang Taruna, dll" required>
                         @error('mitra')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -78,11 +78,11 @@
 
                     <!-- Upload Dokumen Section -->
                     <div class="border-t pt-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upload Dokumen</h3>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Upload Dokumen</h3>
                         
                         <!-- Proposal File -->
                         <div class="mb-4">
-                            <label for="proposal_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label for="proposal_file" class="block text-sm font-medium text-gray-700">
                                 File Proposal 
                                 @if($pengabdian->requiresProposal())
                                     <span class="text-red-500">*</span>
@@ -106,7 +106,7 @@
                         <!-- Laporan Akhir File (conditional) -->
                         @if($pengabdian->requiresFinalDocuments())
                             <div class="mb-4">
-                                <label for="laporan_akhir_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label for="laporan_akhir_file" class="block text-sm font-medium text-gray-700">
                                     File Laporan Akhir 
                                     @if(!$pengabdian->documents()->where('jenis_dokumen', 'laporan_akhir')->exists())
                                         <span class="text-red-500">*</span>
@@ -129,7 +129,7 @@
 
                             <!-- Sertifikat File (conditional) -->
                             <div class="mb-4">
-                                <label for="sertifikat_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label for="sertifikat_file" class="block text-sm font-medium text-gray-700">
                                     File Sertifikat 
                                     @if(!$pengabdian->documents()->where('jenis_dokumen', 'sertifikat')->exists())
                                         <span class="text-red-500">*</span>
@@ -153,7 +153,7 @@
 
                         <!-- Dokumen Pendukung (optional) -->
                         <div class="mb-4">
-                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dokumen Pendukung (Opsional)</label>
+                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700">Dokumen Pendukung (Opsional)</label>
                             @if($pengabdian->documents()->where('jenis_dokumen', 'dokumen_pendukung')->exists())
                                 <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
                                     <p class="text-sm text-blue-700 mb-2">

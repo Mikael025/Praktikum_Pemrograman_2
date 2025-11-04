@@ -30,10 +30,10 @@
                 </div>
                 <!-- Title -->
                 <div class="text-center">
-                    <h1 class="text-5xl font-bold text-text-light dark:text-text-dark pb-2">
+                    <h1 class="text-5xl font-bold text-text-light pb-2">
                         Let's sign you in
                     </h1>
-                    <p class="text-2xl text-muted-light dark:text-muted-dark">Welcome to AKSARA</p>
+                    <p class="text-2xl text-muted-light">Welcome to AKSARA</p>
                 </div>
                                 
                 <div class="w-full max-w-md mx-auto mt-6 px-6 py-4  overflow-hidden">

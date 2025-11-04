@@ -1,35 +1,35 @@
 <x-layouts.dosen>
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Tambah Penelitian Baru</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Tambah Penelitian Baru</h1>
             <a href="{{ route('dosen.penelitian.index') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-700">
                 Kembali
             </a>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6">
             <form method="POST" action="{{ route('dosen.penelitian.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-6">
                     <div>
-                        <label for="judul" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul Penelitian</label>
-                        <input type="text" name="judul" id="judul" value="{{ old('judul') }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
+                        <label for="judul" class="block text-sm font-medium text-gray-700">Judul Penelitian</label>
+                        <input type="text" name="judul" id="judul" value="{{ old('judul') }}" class="mt-1 block w-full rounded-md border-gray-300 required>
                         @error('judul')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="tahun" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun</label>
-                        <input type="number" name="tahun" id="tahun" value="{{ old('tahun', date('Y')) }}" min="2020" max="2030" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
+                        <label for="tahun" class="block text-sm font-medium text-gray-700">Tahun</label>
+                        <input type="number" name="tahun" id="tahun" value="{{ old('tahun', date('Y')) }}" min="2020" max="2030" class="mt-1 block w-full rounded-md border-gray-300 required>
                         @error('tahun')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="tim_peneliti" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tim Peneliti</label>
-                        <textarea name="tim_peneliti" id="tim_peneliti" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Masukkan nama-nama peneliti, dipisahkan dengan koma" required>{{ old('tim_peneliti') }}</textarea>
+                        <label for="tim_peneliti" class="block text-sm font-medium text-gray-700">Tim Peneliti</label>
+                        <textarea name="tim_peneliti" id="tim_peneliti" rows="3" class="mt-1 block w-full rounded-md border-gray-300 placeholder="Masukkan nama-nama peneliti, dipisahkan dengan koma" required>{{ old('tim_peneliti') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Contoh: Dr. John Doe, Prof. Jane Smith, M.Sc. Bob Wilson</p>
                         @error('tim_peneliti')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -37,20 +37,20 @@
                     </div>
 
                     <div>
-                        <label for="sumber_dana" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sumber Dana</label>
-                        <input type="text" name="sumber_dana" id="sumber_dana" value="{{ old('sumber_dana') }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Contoh: Hibah Penelitian Dasar, LPPM, dll" required>
+                        <label for="sumber_dana" class="block text-sm font-medium text-gray-700">Sumber Dana</label>
+                        <input type="text" name="sumber_dana" id="sumber_dana" value="{{ old('sumber_dana') }}" class="mt-1 block w-full rounded-md border-gray-300 placeholder="Contoh: Hibah Penelitian Dasar, LPPM, dll" required>
                         @error('sumber_dana')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- File Upload Section -->
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upload Dokumen</h3>
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Upload Dokumen</h3>
                         
                         <!-- Proposal File (Required) -->
                         <div class="mb-6">
-                            <label for="proposal_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label for="proposal_file" class="block text-sm font-medium text-gray-700">
                                 File Proposal <span class="text-red-500">*</span>
                             </label>
                             <input type="file" name="proposal_file" id="proposal_file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx" required>
@@ -62,7 +62,7 @@
 
                         <!-- Supporting Documents (Optional) -->
                         <div class="mb-6">
-                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700">
                                 Dokumen Pendukung (Opsional)
                             </label>
                             <input type="file" name="dokumen_pendukung[]" id="dokumen_pendukung" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100" accept=".pdf,.doc,.docx">

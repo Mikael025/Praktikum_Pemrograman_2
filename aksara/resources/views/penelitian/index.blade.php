@@ -3,10 +3,10 @@
 
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Penelitian</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Penelitian</h1>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div class="bg-white rounded-lg shadow p-4">
             <x-filter-bar :years="range((int)date('Y'), (int)date('Y')-5)" :show-status="true" />
         </div>
 
@@ -16,30 +16,30 @@
             </div>
         @endif
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Judul</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Tahun</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Dosen</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Sumber Dana</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Aksi</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Judul</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tahun</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dosen</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sumber Dana</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                    <tbody class="divide-y divide-gray-200 bg-white">
                         @forelse($penelitian as $item)
                         <tr>
-                            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                            <td class="px-4 py-3 text-gray-900">
                                 <div class="max-w-xs truncate" title="{{ $item->judul }}">
                                     {{ $item->judul }}
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $item->tahun }}</td>
-                            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $item->user->name }}</td>
-                            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $item->sumber_dana }}</td>
+                            <td class="px-4 py-3 text-gray-900">{{ $item->tahun }}</td>
+                            <td class="px-4 py-3 text-gray-900">{{ $item->user->name }}</td>
+                            <td class="px-4 py-3 text-gray-900">{{ $item->sumber_dana }}</td>
                             <td class="px-4 py-3">
                                 <x-status-badge :status="$item->status" />
                             </td>
@@ -92,7 +92,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                 Belum ada data penelitian.
                             </td>
                         </tr>
@@ -102,7 +102,7 @@
             </div>
             
             @if($penelitian->hasPages())
-            <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+            <div class="px-4 py-3 border-t border-gray-200">
                 {{ $penelitian->links() }}
             </div>
             @endif

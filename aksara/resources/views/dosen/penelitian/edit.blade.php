@@ -1,7 +1,7 @@
 <x-layouts.dosen>
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Edit Penelitian</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Edit Penelitian</h1>
             <div class="flex space-x-3">
                 <a href="{{ route('dosen.penelitian.show', $penelitian) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-700">
                     Lihat Detail
@@ -30,30 +30,30 @@
             @endif
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6">
             <form method="POST" action="{{ route('dosen.penelitian.update', $penelitian) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="space-y-6">
                     <div>
-                        <label for="judul" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Judul Penelitian</label>
-                        <input type="text" name="judul" id="judul" value="{{ old('judul', $penelitian->judul) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
+                        <label for="judul" class="block text-sm font-medium text-gray-700">Judul Penelitian</label>
+                        <input type="text" name="judul" id="judul" value="{{ old('judul', $penelitian->judul) }}" class="mt-1 block w-full rounded-md border-gray-300" required>
                         @error('judul')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="tahun" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun</label>
-                        <input type="number" name="tahun" id="tahun" value="{{ old('tahun', $penelitian->tahun) }}" min="2020" max="2030" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
+                        <label for="tahun" class="block text-sm font-medium text-gray-700">Tahun</label>
+                        <input type="number" name="tahun" id="tahun" value="{{ old('tahun', $penelitian->tahun) }}" min="2020" max="2030" class="mt-1 block w-full rounded-md border-gray-300" required>
                         @error('tahun')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="tim_peneliti" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tim Peneliti</label>
-                        <textarea name="tim_peneliti" id="tim_peneliti" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Masukkan nama-nama peneliti, dipisahkan dengan koma" required>{{ old('tim_peneliti', is_array($penelitian->tim_peneliti) ? implode(', ', $penelitian->tim_peneliti) : $penelitian->tim_peneliti) }}</textarea>
+                        <label for="tim_peneliti" class="block text-sm font-medium text-gray-700">Tim Peneliti</label>
+                        <textarea name="tim_peneliti" id="tim_peneliti" rows="3" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Masukkan nama-nama peneliti, dipisahkan dengan koma" required>{{ old('tim_peneliti', is_array($penelitian->tim_peneliti) ? implode(', ', $penelitian->tim_peneliti) : $penelitian->tim_peneliti) }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Contoh: Dr. John Doe, Prof. Jane Smith, M.Sc. Bob Wilson</p>
                         @error('tim_peneliti')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -61,8 +61,8 @@
                     </div>
 
                     <div>
-                        <label for="sumber_dana" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sumber Dana</label>
-                        <input type="text" name="sumber_dana" id="sumber_dana" value="{{ old('sumber_dana', $penelitian->sumber_dana) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" placeholder="Contoh: Hibah Penelitian Dasar, LPPM, dll" required>
+                        <label for="sumber_dana" class="block text-sm font-medium text-gray-700">Sumber Dana</label>
+                        <input type="text" name="sumber_dana" id="sumber_dana" value="{{ old('sumber_dana', $penelitian->sumber_dana) }}" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Contoh: Hibah Penelitian Dasar, LPPM, dll" required>
                         @error('sumber_dana')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -70,11 +70,11 @@
 
                     <!-- Upload Dokumen Section -->
                     <div class="border-t pt-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upload Dokumen</h3>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Upload Dokumen</h3>
                         
                         <!-- Proposal File -->
                         <div class="mb-4">
-                            <label for="proposal_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label for="proposal_file" class="block text-sm font-medium text-gray-700">
                                 File Proposal 
                                 @if($penelitian->requiresProposal())
                                     <span class="text-red-500">*</span>
@@ -98,7 +98,7 @@
                         <!-- Laporan Akhir File (conditional) -->
                         @if($penelitian->requiresFinalDocuments())
                             <div class="mb-4">
-                                <label for="laporan_akhir_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label for="laporan_akhir_file" class="block text-sm font-medium text-gray-700">
                                     File Laporan Akhir 
                                     @if(!$penelitian->documents()->where('jenis_dokumen', 'laporan_akhir')->exists())
                                         <span class="text-red-500">*</span>
@@ -121,7 +121,7 @@
 
                             <!-- Sertifikat File (conditional) -->
                             <div class="mb-4">
-                                <label for="sertifikat_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label for="sertifikat_file" class="block text-sm font-medium text-gray-700">
                                     File Sertifikat 
                                     @if(!$penelitian->documents()->where('jenis_dokumen', 'sertifikat')->exists())
                                         <span class="text-red-500">*</span>
@@ -145,7 +145,7 @@
 
                         <!-- Dokumen Pendukung (optional) -->
                         <div class="mb-4">
-                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dokumen Pendukung (Opsional)</label>
+                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700">Dokumen Pendukung (Opsional)</label>
                             @if($penelitian->documents()->where('jenis_dokumen', 'dokumen_pendukung')->exists())
                                 <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
                                     <p class="text-sm text-blue-700 mb-2">
