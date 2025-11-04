@@ -18,8 +18,8 @@
         <div class="min-h-screen bg-gray-100">
             <div class="flex min-h-screen">
                 <!-- Sidebar -->
-                <aside class="hidden md:flex md:w-64 md:flex-col bg-gray-900 text-gray-800">
-                    <div class="h-16 flex items-center gap-3 px-4 border-b border-gray-800">
+                <aside class="hidden md:flex md:w-64 md:flex-col bg-white text-gray-800">
+                    <div class="h-16 flex items-center gap-3 px-4 border-b">
                         <img src="{{ asset('images/logoAksara.png') }}" alt="Logo" class="h-8 w-8">
                         <span class="text-lg font-semibold">Aksara</span>
                     </div>
