@@ -27,8 +27,17 @@
                         <x-sidebar-link href="{{ route('dashboard.admin') }}" :active="request()->routeIs('dashboard.admin')">Dashboard</x-sidebar-link>
                         <x-sidebar-link href="{{ route('penelitian.index') }}" :active="request()->routeIs('penelitian.*')">Penelitian</x-sidebar-link>
                         <x-sidebar-link href="{{ route('pengabdian.index') }}" :active="request()->routeIs('pengabdian.*')">Pengabdian Masyarakat</x-sidebar-link>
-                        <div class="pt-2 mt-2 border-t border-gray-800"></div>
-                        <x-sidebar-link href="#" :active="false">Informasi/Berita</x-sidebar-link>
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                                Informasi/Berita
+                                <svg class="ml-auto h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            <div x-show="open" @click.away="open=false" class="mt-1 ml-3 space-y-1">
+                                <x-sidebar-link href="{{ route('admin.informasi.index', ['k' => 'penelitian']) }}" :active="request()->fullUrlIs(route('admin.informasi.index', ['k' => 'penelitian']))">Informasi Penelitian</x-sidebar-link>
+                                <x-sidebar-link href="{{ route('admin.informasi.index', ['k' => 'pengabdian']) }}" :active="request()->fullUrlIs(route('admin.informasi.index', ['k' => 'pengabdian']))">Informasi Pengabdian Masyarakat</x-sidebar-link>
+                                <x-sidebar-link href="{{ route('admin.informasi.index', ['k' => 'umum']) }}" :active="request()->fullUrlIs(route('admin.informasi.index', ['k' => 'umum']))">Informasi Umum</x-sidebar-link>
+                            </div>
+                        </div>
                         <x-sidebar-link href="#" :active="false">Laporan dan Rekap</x-sidebar-link>
                         <form method="POST" action="{{ route('logout') }}" class="pt-2">
                             @csrf

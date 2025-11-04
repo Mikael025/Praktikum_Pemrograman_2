@@ -8,7 +8,7 @@
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <form method="POST" action="{{ route('dosen.pengabdian.store') }}">
+            <form method="POST" action="{{ route('dosen.pengabdian.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-6">
                     <div>
@@ -51,11 +51,47 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <!-- File Upload Section -->
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upload Dokumen</h3>
+                        
+                        <!-- Proposal File (Required) -->
+                        <div class="mb-6">
+                            <label for="proposal_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                File Proposal <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" name="proposal_file" id="proposal_file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx" required>
+                            <p class="mt-1 text-sm text-gray-500">Format: PDF, DOC, DOCX (Maksimal 10MB)</p>
+                            @error('proposal_file')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Supporting Documents (Optional) -->
+                        <div class="mb-6">
+                            <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Dokumen Pendukung (Opsional)
+                            </label>
+                            <input type="file" name="dokumen_pendukung[]" id="dokumen_pendukung" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100" accept=".pdf,.doc,.docx">
+                            <p class="mt-1 text-sm text-gray-500">Format: PDF, DOC, DOCX (Maksimal 10MB per file)</p>
+                            @error('dokumen_pendukung.*')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Error Display -->
+                    @if($errors->has('error'))
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                            {{ $errors->first('error') }}
+                        </div>
+                    @endif
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-8">
                     <a href="{{ route('dosen.pengabdian.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">Batal</a>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">Simpan</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">Simpan & Ajukan</button>
                 </div>
             </form>
         </div>

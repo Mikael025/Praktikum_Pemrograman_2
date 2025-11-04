@@ -3,12 +3,13 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class AdminPengabdianRequest extends FormRequest
 {
     public function authorize()
     {
-        return auth()->user() && auth()->user()->role === 'admin';
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     public function rules()
@@ -19,7 +20,7 @@ class AdminPengabdianRequest extends FormRequest
             'tim_pelaksana' => 'required|string',
             'lokasi' => 'required|string|max:255',
             'mitra' => 'required|string|max:255',
-            'status' => 'required|in:draft,menunggu_verifikasi,terverifikasi,ditolak,berjalan,selesai',
+            'status' => 'required|in:diusulkan,tidak_lolos,lolos_perlu_revisi,lolos,revisi_pra_final,selesai',
             'catatan_verifikasi' => 'nullable|string|max:500'
         ];
     }

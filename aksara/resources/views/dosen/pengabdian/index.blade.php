@@ -64,13 +64,18 @@
                                 </td>
                                 <td class="px-4 py-3 text-right space-x-2">
                                     <a href="{{ route('dosen.pengabdian.show', $item) }}" class="text-indigo-600 hover:text-indigo-800">Lihat</a>
-                                    <a href="{{ route('dosen.pengabdian.edit', $item) }}" class="text-yellow-600 hover:text-yellow-700">Edit</a>
-                                    <button onclick="uploadDocument({{ $item->id }})" class="text-emerald-600 hover:text-emerald-700">Upload</button>
-                                    <form method="POST" action="{{ route('dosen.pengabdian.destroy', $item) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengabdian ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-700">Hapus</button>
-                                    </form>
+                                    
+                                    @if($item->canBeEditedByDosen())
+                                        <a href="{{ route('dosen.pengabdian.edit', $item) }}" class="text-yellow-600 hover:text-yellow-700">Edit</a>
+                                    @endif
+                                    
+                                    @if($item->canBeDeleted())
+                                        <form method="POST" action="{{ route('dosen.pengabdian.destroy', $item) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengabdian ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-700">Hapus</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -86,48 +91,10 @@
         </div>
     </div>
 
-    <!-- Modal Upload Dokumen -->
-    <div id="uploadModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Upload Dokumen</h3>
-                    <form id="uploadForm" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Dokumen</label>
-                                <select name="jenis_dokumen" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-gray-100" required>
-                                    <option value="">Pilih jenis dokumen</option>
-                                    <option value="proposal">Proposal</option>
-                                    <option value="laporan_akhir">Laporan Akhir</option>
-                                    <option value="sertifikat">Sertifikat</option>
-                                    <option value="dokumen_pendukung">Dokumen Pendukung</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">File</label>
-                                <input type="file" name="file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx" required>
-                            </div>
-                        </div>
-                        <div class="flex justify-end space-x-3 mt-6">
-                            <button type="button" onclick="closeUploadModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">Batal</button>
-                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">Upload</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <!-- Error Display -->
+    @if($errors->has('error'))
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            {{ $errors->first('error') }}
         </div>
-    </div>
-
-    <script>
-        function uploadDocument(pengabdianId) {
-            document.getElementById('uploadForm').action = `/dosen/pengabdian/${pengabdianId}/upload-document`;
-            document.getElementById('uploadModal').classList.remove('hidden');
-        }
-
-        function closeUploadModal() {
-            document.getElementById('uploadModal').classList.add('hidden');
-        }
-    </script>
+    @endif
 </x-layouts.dosen>

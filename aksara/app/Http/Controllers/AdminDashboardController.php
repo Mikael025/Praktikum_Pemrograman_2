@@ -13,47 +13,47 @@ class AdminDashboardController extends Controller
         try {
             $year = $request->get('year', date('Y'));
             
-            // Statistik Penelitian - dengan try catch untuk handle jika tabel belum ada
+            // Statistik Penelitian - dengan status baru
             $penelitianStats = [
-                'total_aktif' => 0,
-                'menunggu_verifikasi' => 0,
-                'selesai_diverifikasi' => 0,
-                'ditolak' => 0,
+                'diusulkan' => 0,
+                'tidak_lolos' => 0,
+                'lolos' => 0,
+                'selesai' => 0,
             ];
             
             try {
                 $penelitianStats = [
-                    'total_aktif' => Penelitian::whereYear('created_at', $year)
-                        ->whereIn('status', ['berjalan', 'terverifikasi', 'menunggu_verifikasi'])->count(),
-                    'menunggu_verifikasi' => Penelitian::whereYear('created_at', $year)
-                        ->where('status', 'menunggu_verifikasi')->count(),
-                    'selesai_diverifikasi' => Penelitian::whereYear('created_at', $year)
-                        ->where('status', 'terverifikasi')->count(),
-                    'ditolak' => Penelitian::whereYear('created_at', $year)
-                        ->where('status', 'ditolak')->count(),
+                    'diusulkan' => Penelitian::whereYear('created_at', $year)
+                        ->where('status', 'diusulkan')->count(),
+                    'tidak_lolos' => Penelitian::whereYear('created_at', $year)
+                        ->where('status', 'tidak_lolos')->count(),
+                    'lolos' => Penelitian::whereYear('created_at', $year)
+                        ->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+                    'selesai' => Penelitian::whereYear('created_at', $year)
+                        ->where('status', 'selesai')->count(),
                 ];
             } catch (\Exception $e) {
                 // Jika tabel belum ada, gunakan nilai default
             }
             
-            // Statistik Pengabdian - dengan try catch untuk handle jika tabel belum ada
+            // Statistik Pengabdian - dengan status baru
             $pengabdianStats = [
-                'total_aktif' => 0,
-                'menunggu_verifikasi' => 0,
-                'selesai_diverifikasi' => 0,
-                'ditolak' => 0,
+                'diusulkan' => 0,
+                'tidak_lolos' => 0,
+                'lolos' => 0,
+                'selesai' => 0,
             ];
             
             try {
                 $pengabdianStats = [
-                    'total_aktif' => Pengabdian::whereYear('created_at', $year)
-                        ->whereIn('status', ['berjalan', 'terverifikasi', 'menunggu_verifikasi'])->count(),
-                    'menunggu_verifikasi' => Pengabdian::whereYear('created_at', $year)
-                        ->where('status', 'menunggu_verifikasi')->count(),
-                    'selesai_diverifikasi' => Pengabdian::whereYear('created_at', $year)
-                        ->where('status', 'terverifikasi')->count(),
-                    'ditolak' => Pengabdian::whereYear('created_at', $year)
-                        ->where('status', 'ditolak')->count(),
+                    'diusulkan' => Pengabdian::whereYear('created_at', $year)
+                        ->where('status', 'diusulkan')->count(),
+                    'tidak_lolos' => Pengabdian::whereYear('created_at', $year)
+                        ->where('status', 'tidak_lolos')->count(),
+                    'lolos' => Pengabdian::whereYear('created_at', $year)
+                        ->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+                    'selesai' => Pengabdian::whereYear('created_at', $year)
+                        ->where('status', 'selesai')->count(),
                 ];
             } catch (\Exception $e) {
                 // Jika tabel belum ada, gunakan nilai default
@@ -63,17 +63,17 @@ class AdminDashboardController extends Controller
         } catch (\Exception $e) {
             // Fallback jika ada error
             $penelitianStats = [
-                'total_aktif' => 0,
-                'menunggu_verifikasi' => 0,
-                'selesai_diverifikasi' => 0,
-                'ditolak' => 0,
+                'diusulkan' => 0,
+                'tidak_lolos' => 0,
+                'lolos' => 0,
+                'selesai' => 0,
             ];
             
             $pengabdianStats = [
-                'total_aktif' => 0,
-                'menunggu_verifikasi' => 0,
-                'selesai_diverifikasi' => 0,
-                'ditolak' => 0,
+                'diusulkan' => 0,
+                'tidak_lolos' => 0,
+                'lolos' => 0,
+                'selesai' => 0,
             ];
             
             $year = date('Y');

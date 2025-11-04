@@ -3,10 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Pengabdian;
 use App\Models\PengabdianDocument;
+use App\Http\Requests\StorePengabdianRequest;
+use App\Http\Requests\UpdatePengabdianRequest;
+use App\Exceptions\WorkflowException;
+use App\Exceptions\UnauthorizedActionException;
+use App\Exceptions\DocumentUploadException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DosenPengabdianController extends Controller
 {
@@ -15,7 +22,9 @@ class DosenPengabdianController extends Controller
      */
     public function index()
     {
-        $pengabdian = Auth::user()->pengabdian()->latest()->get();
+        /** @var User $user */
+        $user = Auth::user();
+        $pengabdian = $user->pengabdian()->latest()->get();
         return view('dosen.pengabdian.index', compact('pengabdian'));
     }
 
@@ -30,23 +39,56 @@ class DosenPengabdianController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePengabdianRequest $request)
     {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'tahun' => 'required|integer|min:2020|max:2030',
-            'tim_pelaksana' => 'required|string',
-            'lokasi' => 'required|string|max:255',
-            'mitra' => 'required|string|max:255',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $validated['user_id'] = Auth::id();
-        $validated['tim_pelaksana'] = json_encode(explode(',', $validated['tim_pelaksana']));
-        $validated['status'] = 'draft';
+            $validated = $request->validated();
+            $validated['user_id'] = Auth::id();
+            $validated['tim_pelaksana'] = json_encode(explode(',', $validated['tim_pelaksana']));
+            $validated['status'] = 'diusulkan';
 
-        Pengabdian::create($validated);
+            $pengabdian = Pengabdian::create($validated);
 
-        return redirect()->route('dosen.pengabdian.index')->with('success', 'Pengabdian berhasil ditambahkan.');
+            // Upload proposal file
+            if ($request->hasFile('proposal_file')) {
+                $file = $request->file('proposal_file');
+                $path = $file->store('pengabdian/documents', 'public');
+
+                PengabdianDocument::create([
+                    'pengabdian_id' => $pengabdian->id,
+                    'jenis_dokumen' => 'proposal',
+                    'nama_file' => $file->getClientOriginalName(),
+                    'path_file' => $path,
+                    'uploaded_at' => now(),
+                ]);
+            }
+
+            // Upload optional supporting documents
+            if ($request->hasFile('dokumen_pendukung')) {
+                foreach ($request->file('dokumen_pendukung') as $file) {
+                    $path = $file->store('pengabdian/documents', 'public');
+
+                    PengabdianDocument::create([
+                        'pengabdian_id' => $pengabdian->id,
+                        'jenis_dokumen' => 'dokumen_pendukung',
+                        'nama_file' => $file->getClientOriginalName(),
+                        'path_file' => $path,
+                        'uploaded_at' => now(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('dosen.pengabdian.index')
+                ->with('success', 'Pengabdian berhasil ditambahkan dan siap untuk diverifikasi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new DocumentUploadException('Gagal menyimpan pengabdian: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -75,25 +117,102 @@ class DosenPengabdianController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Pengabdian $pengabdian)
+    public function update(UpdatePengabdianRequest $request, Pengabdian $pengabdian)
     {
-        if ($pengabdian->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+        try {
+            if ($pengabdian->user_id !== Auth::id()) {
+                throw new UnauthorizedActionException('update', $pengabdian->status);
+            }
+
+            if (!$pengabdian->canBeEditedByDosen()) {
+                throw new UnauthorizedActionException('update', $pengabdian->status);
+            }
+
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+            $validated['tim_pelaksana'] = json_encode(explode(',', $validated['tim_pelaksana']));
+
+            $pengabdian->update($validated);
+
+            // Handle file uploads
+            $this->handleFileUploads($request, $pengabdian);
+
+            DB::commit();
+
+            return redirect()->route('dosen.pengabdian.index')
+                ->with('success', 'Pengabdian berhasil diperbarui.');
+
+        } catch (WorkflowException $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
-        
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'tahun' => 'required|integer|min:2020|max:2030',
-            'tim_pelaksana' => 'required|string',
-            'lokasi' => 'required|string|max:255',
-            'mitra' => 'required|string|max:255',
-        ]);
+    }
 
-        $validated['tim_pelaksana'] = json_encode(explode(',', $validated['tim_pelaksana']));
+    /**
+     * Handle file uploads for pengabdian
+     */
+    private function handleFileUploads($request, Pengabdian $pengabdian)
+    {
+        // Upload proposal if provided
+        if ($request->hasFile('proposal_file')) {
+            $file = $request->file('proposal_file');
+            $path = $file->store('pengabdian/documents', 'public');
 
-        $pengabdian->update($validated);
+            PengabdianDocument::create([
+                'pengabdian_id' => $pengabdian->id,
+                'jenis_dokumen' => 'proposal',
+                'nama_file' => $file->getClientOriginalName(),
+                'path_file' => $path,
+                'uploaded_at' => now(),
+            ]);
+        }
 
-        return redirect()->route('dosen.pengabdian.index')->with('success', 'Pengabdian berhasil diperbarui.');
+        // Upload laporan akhir if provided
+        if ($request->hasFile('laporan_akhir_file')) {
+            $file = $request->file('laporan_akhir_file');
+            $path = $file->store('pengabdian/documents', 'public');
+
+            PengabdianDocument::create([
+                'pengabdian_id' => $pengabdian->id,
+                'jenis_dokumen' => 'laporan_akhir',
+                'nama_file' => $file->getClientOriginalName(),
+                'path_file' => $path,
+                'uploaded_at' => now(),
+            ]);
+        }
+
+        // Upload sertifikat if provided
+        if ($request->hasFile('sertifikat_file')) {
+            $file = $request->file('sertifikat_file');
+            $path = $file->store('pengabdian/documents', 'public');
+
+            PengabdianDocument::create([
+                'pengabdian_id' => $pengabdian->id,
+                'jenis_dokumen' => 'sertifikat',
+                'nama_file' => $file->getClientOriginalName(),
+                'path_file' => $path,
+                'uploaded_at' => now(),
+            ]);
+        }
+
+        // Upload supporting documents if provided
+        if ($request->hasFile('dokumen_pendukung')) {
+            foreach ($request->file('dokumen_pendukung') as $file) {
+                $path = $file->store('pengabdian/documents', 'public');
+
+                PengabdianDocument::create([
+                    'pengabdian_id' => $pengabdian->id,
+                    'jenis_dokumen' => 'dokumen_pendukung',
+                    'nama_file' => $file->getClientOriginalName(),
+                    'path_file' => $path,
+                    'uploaded_at' => now(),
+                ]);
+            }
+        }
     }
 
     /**
@@ -101,48 +220,35 @@ class DosenPengabdianController extends Controller
      */
     public function destroy(Pengabdian $pengabdian)
     {
-        if ($pengabdian->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+        try {
+            if ($pengabdian->user_id !== Auth::id()) {
+                throw new UnauthorizedActionException('delete', $pengabdian->status);
+            }
+
+            if (!$pengabdian->canBeDeleted()) {
+                throw new UnauthorizedActionException('delete', $pengabdian->status);
+            }
+
+            DB::beginTransaction();
+
+            // Hapus dokumen terkait
+            foreach ($pengabdian->documents as $document) {
+                Storage::disk('public')->delete($document->path_file);
+            }
+            
+            $pengabdian->delete();
+
+            DB::commit();
+
+            return redirect()->route('dosen.pengabdian.index')
+                ->with('success', 'Pengabdian berhasil dihapus.');
+
+        } catch (WorkflowException $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
-        
-        // Hapus dokumen terkait
-        foreach ($pengabdian->documents as $document) {
-            Storage::disk('public')->delete($document->path_file);
-        }
-        
-        $pengabdian->delete();
-
-        return redirect()->route('dosen.pengabdian.index')->with('success', 'Pengabdian berhasil dihapus.');
-    }
-
-    /**
-     * Upload document for pengabdian
-     */
-    public function uploadDocument(Request $request, Pengabdian $pengabdian)
-    {
-        if ($pengabdian->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        $validated = $request->validate([
-            'jenis_dokumen' => 'required|in:proposal,laporan_akhir,sertifikat,dokumen_pendukung',
-            'file' => 'required|file|mimes:pdf,doc,docx|max:10240',
-        ]);
-
-        $file = $request->file('file');
-        $path = $file->store('pengabdian/documents', 'public');
-
-        PengabdianDocument::create([
-            'pengabdian_id' => $pengabdian->id,
-            'jenis_dokumen' => $validated['jenis_dokumen'],
-            'nama_file' => $file->getClientOriginalName(),
-            'path_file' => $path,
-            'uploaded_at' => now(),
-        ]);
-
-        // Update status pengabdian ke menunggu_verifikasi
-        $pengabdian->update(['status' => 'menunggu_verifikasi']);
-
-        return back()->with('success', 'Dokumen berhasil diunggah dan pengabdian siap untuk diverifikasi.');
     }
 }

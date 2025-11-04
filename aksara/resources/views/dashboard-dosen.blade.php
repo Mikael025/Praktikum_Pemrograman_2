@@ -13,23 +13,23 @@
 
         <!-- Statistik Penelitian -->
         <section class="space-y-3">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Statistik Kegiatan Penelitian</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Statistik Penelitian Saya</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <x-stat-card title="Usulan Dokumen Penelitian" :value="$penelitianUsulan" color="blue" />
-                <x-stat-card title="Dokumen Belum Lengkap" :value="$penelitianBelumLengkap" color="yellow" />
-                <x-stat-card title="Seleksi Dokumen Penelitian" :value="$penelitianSeleksi" color="orange" />
-                <x-stat-card title="Dokumen Lolos Penelitian" :value="$penelitianLolos" color="green" />
+                <x-stat-card title="Jumlah Penelitian Diusulkan" :value="$penelitianStats['diusulkan']" color="blue" />
+                <x-stat-card title="Jumlah Penelitian Tidak Lolos" :value="$penelitianStats['tidak_lolos']" color="red" />
+                <x-stat-card title="Jumlah Penelitian Lolos" :value="$penelitianStats['lolos']" color="green" />
+                <x-stat-card title="Jumlah Penelitian Selesai" :value="$penelitianStats['selesai']" color="emerald" />
             </div>
         </section>
 
         <!-- Statistik Pengabdian -->
         <section class="space-y-3">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Statistik Kegiatan Pengabdian Masyarakat</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Statistik Pengabdian Masyarakat Saya</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <x-stat-card title="Usulan Dokumen Pengabdian" :value="$pengabdianUsulan" color="blue" />
-                <x-stat-card title="Dokumen Belum Lengkap" :value="$pengabdianBelumLengkap" color="yellow" />
-                <x-stat-card title="Seleksi Dokumen Pengabdian" :value="$pengabdianSeleksi" color="orange" />
-                <x-stat-card title="Dokumen Lolos Pengabdian" :value="$pengabdianLolos" color="green" />
+                <x-stat-card title="Jumlah Pengabdian Diusulkan" :value="$pengabdianStats['diusulkan']" color="blue" />
+                <x-stat-card title="Jumlah Pengabdian Tidak Lolos" :value="$pengabdianStats['tidak_lolos']" color="red" />
+                <x-stat-card title="Jumlah Pengabdian Lolos" :value="$pengabdianStats['lolos']" color="green" />
+                <x-stat-card title="Jumlah Pengabdian Selesai" :value="$pengabdianStats['selesai']" color="emerald" />
             </div>
         </section>
     </div>

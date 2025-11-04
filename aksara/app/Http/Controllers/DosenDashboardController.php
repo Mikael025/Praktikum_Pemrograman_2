@@ -3,36 +3,34 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Penelitian;
 use App\Models\Pengabdian;
+use Illuminate\Support\Facades\Auth;
 
 class DosenDashboardController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
-        // Statistik Penelitian
-        $penelitianUsulan = $user->penelitian()->count();
-        $penelitianBelumLengkap = $user->penelitian()->where('status', 'draft')->count();
-        $penelitianSeleksi = $user->penelitian()->where('status', 'menunggu_verifikasi')->count();
-        $penelitianLolos = $user->penelitian()->where('status', 'terverifikasi')->count();
+        // Statistik Penelitian dengan status baru
+        $penelitianStats = [
+            'diusulkan' => $user->penelitian()->where('status', 'diusulkan')->count(),
+            'tidak_lolos' => $user->penelitian()->where('status', 'tidak_lolos')->count(),
+            'lolos' => $user->penelitian()->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+            'selesai' => $user->penelitian()->where('status', 'selesai')->count(),
+        ];
         
-        // Statistik Pengabdian
-        $pengabdianUsulan = $user->pengabdian()->count();
-        $pengabdianBelumLengkap = $user->pengabdian()->where('status', 'draft')->count();
-        $pengabdianSeleksi = $user->pengabdian()->where('status', 'menunggu_verifikasi')->count();
-        $pengabdianLolos = $user->pengabdian()->where('status', 'terverifikasi')->count();
+        // Statistik Pengabdian dengan status baru
+        $pengabdianStats = [
+            'diusulkan' => $user->pengabdian()->where('status', 'diusulkan')->count(),
+            'tidak_lolos' => $user->pengabdian()->where('status', 'tidak_lolos')->count(),
+            'lolos' => $user->pengabdian()->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+            'selesai' => $user->pengabdian()->where('status', 'selesai')->count(),
+        ];
         
-        return view('dashboard-dosen', compact(
-            'penelitianUsulan',
-            'penelitianBelumLengkap', 
-            'penelitianSeleksi',
-            'penelitianLolos',
-            'pengabdianUsulan',
-            'pengabdianBelumLengkap',
-            'pengabdianSeleksi',
-            'pengabdianLolos'
-        ));
+        return view('dashboard-dosen', compact('penelitianStats', 'pengabdianStats'));
     }
 }

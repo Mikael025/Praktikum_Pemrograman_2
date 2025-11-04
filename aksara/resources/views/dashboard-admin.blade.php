@@ -17,12 +17,10 @@
         <section class="space-y-3">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Statistik Kegiatan Penelitian</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <x-stat-card title="Total Penelitian Aktif" :value="$penelitianStats['total_aktif']" />
-                @if($isAdmin)
-                    <x-stat-card title="Dokumen Menunggu Verifikasi" :value="$penelitianStats['menunggu_verifikasi']" />
-                    <x-stat-card title="Dokumen Selesai Diverifikasi" :value="$penelitianStats['selesai_diverifikasi']" />
-                @endif
-                <x-stat-card title="Jumlah Dokumen Ditolak" :value="$penelitianStats['ditolak']" />
+                <x-stat-card title="Jumlah Penelitian Diusulkan" :value="$penelitianStats['diusulkan']" />
+                <x-stat-card title="Jumlah Penelitian Tidak Lolos" :value="$penelitianStats['tidak_lolos']" />
+                <x-stat-card title="Jumlah Penelitian Lolos" :value="$penelitianStats['lolos']" />
+                <x-stat-card title="Jumlah Penelitian Selesai" :value="$penelitianStats['selesai']" />
             </div>
         </section>
 
@@ -30,12 +28,10 @@
         <section class="space-y-3">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Statistik Kegiatan Pengabdian Masyarakat</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <x-stat-card title="Total Pengabdian Aktif" :value="$pengabdianStats['total_aktif']" />
-                @if($isAdmin)
-                    <x-stat-card title="Dokumen Menunggu Verifikasi" :value="$pengabdianStats['menunggu_verifikasi']" />
-                    <x-stat-card title="Dokumen Selesai Diverifikasi" :value="$pengabdianStats['selesai_diverifikasi']" />
-                @endif
-                <x-stat-card title="Jumlah Dokumen Ditolak" :value="$pengabdianStats['ditolak']" />
+                <x-stat-card title="Jumlah Pengabdian Diusulkan" :value="$pengabdianStats['diusulkan']" />
+                <x-stat-card title="Jumlah Pengabdian Tidak Lolos" :value="$pengabdianStats['tidak_lolos']" />
+                <x-stat-card title="Jumlah Pengabdian Lolos" :value="$pengabdianStats['lolos']" />
+                <x-stat-card title="Jumlah Pengabdian Selesai" :value="$pengabdianStats['selesai']" />
             </div>
         </section>
     </div>

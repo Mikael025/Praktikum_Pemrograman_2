@@ -101,7 +101,7 @@
         </div>
 
         <!-- Form Verifikasi Dokumen -->
-        @if($pengabdian->status === 'menunggu_verifikasi')
+        @if(in_array($pengabdian->status, ['diusulkan', 'lolos_perlu_revisi', 'lolos', 'revisi_pra_final']))
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div class="flex items-center mb-4">
                 <svg class="w-6 h-6 text-emerald-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,43 +125,149 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Form Terima -->
-                <form action="{{ route('pengabdian.verify', $pengabdian) }}" method="POST" class="space-y-4">
-                    @csrf
-                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-green-800 dark:text-green-200 mb-3">Terima Dokumen</h3>
-                        <div class="mb-4">
-                            <label for="catatan_verify" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Verifikasi (Opsional)</label>
-                            <textarea id="catatan_verify" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
-                        </div>
-                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Terima & Verifikasi
-                        </button>
-                    </div>
-                </form>
-                
+            <!-- Form untuk Status Diusulkan -->
+            @if($pengabdian->status === 'diusulkan')
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Form Tolak -->
-                <form action="{{ route('pengabdian.reject', $pengabdian) }}" method="POST" class="space-y-4">
+                <form action="{{ route('pengabdian.tidak-lolos', $pengabdian) }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200 mb-3">Tolak Dokumen</h3>
+                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200 mb-3">Tolak Pengabdian</h3>
                         <div class="mb-4">
                             <label for="catatan_reject" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alasan Penolakan <span class="text-red-500">*</span></label>
-                            <textarea id="catatan_reject" name="catatan" rows="3" required placeholder="Jelaskan alasan penolakan dokumen..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                            <textarea id="catatan_reject" name="catatan" rows="3" required placeholder="Jelaskan alasan penolakan pengabdian..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
                         </div>
                         <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            Tolak Dokumen
+                            Tolak Pengabdian
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Form Lolos Perlu Revisi -->
+                <form action="{{ route('pengabdian.lolos-perlu-revisi', $pengabdian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-3">Lolos Perlu Revisi</h3>
+                        <div class="mb-4">
+                            <label for="catatan_revisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Revisi <span class="text-red-500">*</span></label>
+                            <textarea id="catatan_revisi" name="catatan" rows="3" required placeholder="Berikan catatan revisi yang diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Lolos Perlu Revisi
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Form Lolos -->
+                <form action="{{ route('pengabdian.lolos', $pengabdian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-green-800 dark:text-green-200 mb-3">Lolos</h3>
+                        <div class="mb-4">
+                            <label for="catatan_lolos" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan (Opsional)</label>
+                            <textarea id="catatan_lolos" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Lolos
                         </button>
                     </div>
                 </form>
             </div>
+            @endif
+
+            <!-- Form untuk Status Lolos Perlu Revisi -->
+            @if($pengabdian->status === 'lolos_perlu_revisi')
+            <div class="max-w-md mx-auto">
+                <form action="{{ route('pengabdian.lolos', $pengabdian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-green-800 dark:text-green-200 mb-3">Lolos</h3>
+                        <div class="mb-4">
+                            <label for="catatan_lolos" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan (Opsional)</label>
+                            <textarea id="catatan_lolos" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Lolos
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+
+            <!-- Form untuk Status Lolos -->
+            @if($pengabdian->status === 'lolos')
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Form Revisi Pra-final -->
+                <form action="{{ route('pengabdian.revisi-pra-final', $pengabdian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-orange-800 dark:text-orange-200 mb-3">Revisi Pra-final</h3>
+                        <div class="mb-4">
+                            <label for="catatan_revisi_pra" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Revisi <span class="text-red-500">*</span></label>
+                            <textarea id="catatan_revisi_pra" name="catatan" rows="3" required placeholder="Berikan catatan revisi pra-final yang diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Revisi Pra-final
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Form Selesai -->
+                <form action="{{ route('pengabdian.selesai', $pengabdian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-3">Selesai</h3>
+                        <div class="mb-4">
+                            <label for="catatan_selesai" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan (Opsional)</label>
+                            <textarea id="catatan_selesai" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Selesai
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+
+            <!-- Form untuk Status Revisi Pra-final -->
+            @if($pengabdian->status === 'revisi_pra_final')
+            <div class="max-w-md mx-auto">
+                <form action="{{ route('pengabdian.selesai', $pengabdian) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-3">Selesai</h3>
+                        <div class="mb-4">
+                            <label for="catatan_selesai" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan (Opsional)</label>
+                            <textarea id="catatan_selesai" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Selesai
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
         </div>
         @endif
     </div>

@@ -3,12 +3,13 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class AdminPenelitianRequest extends FormRequest
 {
     public function authorize()
     {
-        return auth()->user() && auth()->user()->role === 'admin';
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     public function rules()
@@ -18,7 +19,7 @@ class AdminPenelitianRequest extends FormRequest
             'tahun' => 'required|integer|min:2020|max:' . (date('Y') + 5),
             'tim_peneliti' => 'required|string',
             'sumber_dana' => 'required|string|max:255',
-            'status' => 'required|in:draft,menunggu_verifikasi,terverifikasi,ditolak,berjalan,selesai',
+            'status' => 'required|in:diusulkan,tidak_lolos,lolos_perlu_revisi,lolos,revisi_pra_final,selesai',
             'catatan_verifikasi' => 'nullable|string|max:500'
         ];
     }

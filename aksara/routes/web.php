@@ -7,6 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 })->name('public.home');
 
+// Ni hapus?
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -24,7 +25,6 @@ Route::middleware(['auth', 'verified', 'role:dosen'])->group(function () {
         'update' => 'dosen.penelitian.update',
         'destroy' => 'dosen.penelitian.destroy',
     ]);
-    Route::post('dosen/penelitian/{penelitian}/upload-document', [App\Http\Controllers\DosenPenelitianController::class, 'uploadDocument'])->name('dosen.penelitian.upload-document');
     
     // Pengabdian routes
     Route::resource('dosen/pengabdian', App\Http\Controllers\DosenPengabdianController::class)->names([
@@ -36,12 +36,11 @@ Route::middleware(['auth', 'verified', 'role:dosen'])->group(function () {
         'update' => 'dosen.pengabdian.update',
         'destroy' => 'dosen.pengabdian.destroy',
     ]);
-    Route::post('dosen/pengabdian/{pengabdian}/upload-document', [App\Http\Controllers\DosenPengabdianController::class, 'uploadDocument'])->name('dosen.pengabdian.upload-document');
     
-    // Informasi/Berita placeholder
-    Route::get('/dosen/informasi', function () {
-        return view('dosen.informasi');
-    })->name('dosen.informasi');
+    // Informasi/Berita dosen (read-only)
+    Route::get('/dosen/informasi', [App\Http\Controllers\DosenInformasiController::class, 'index'])->name('dosen.informasi');
+    Route::get('/dosen/informasi/{slug}', [App\Http\Controllers\DosenInformasiController::class, 'show'])->name('dosen.informasi.show');
+
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -49,15 +48,27 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     
     // Penelitian routes
     Route::resource('penelitian', App\Http\Controllers\AdminPenelitianController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
-    Route::post('penelitian/{penelitian}/verify', [App\Http\Controllers\AdminPenelitianController::class, 'verify'])->name('penelitian.verify');
-    Route::post('penelitian/{penelitian}/reject', [App\Http\Controllers\AdminPenelitianController::class, 'reject'])->name('penelitian.reject');
+    Route::post('penelitian/{penelitian}/tidak-lolos', [App\Http\Controllers\AdminPenelitianController::class, 'setTidakLolos'])->name('penelitian.tidak-lolos');
+    Route::post('penelitian/{penelitian}/lolos-perlu-revisi', [App\Http\Controllers\AdminPenelitianController::class, 'setLolosPerluRevisi'])->name('penelitian.lolos-perlu-revisi');
+    Route::post('penelitian/{penelitian}/lolos', [App\Http\Controllers\AdminPenelitianController::class, 'setLolos'])->name('penelitian.lolos');
+    Route::post('penelitian/{penelitian}/revisi-pra-final', [App\Http\Controllers\AdminPenelitianController::class, 'setRevisiPraFinal'])->name('penelitian.revisi-pra-final');
+    Route::post('penelitian/{penelitian}/selesai', [App\Http\Controllers\AdminPenelitianController::class, 'setSelesai'])->name('penelitian.selesai');
     
     // Pengabdian routes
     Route::resource('pengabdian', App\Http\Controllers\AdminPengabdianController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
-    Route::post('pengabdian/{pengabdian}/verify', [App\Http\Controllers\AdminPengabdianController::class, 'verify'])->name('pengabdian.verify');
-    Route::post('pengabdian/{pengabdian}/reject', [App\Http\Controllers\AdminPengabdianController::class, 'reject'])->name('pengabdian.reject');
+    Route::post('pengabdian/{pengabdian}/tidak-lolos', [App\Http\Controllers\AdminPengabdianController::class, 'setTidakLolos'])->name('pengabdian.tidak-lolos');
+    Route::post('pengabdian/{pengabdian}/lolos-perlu-revisi', [App\Http\Controllers\AdminPengabdianController::class, 'setLolosPerluRevisi'])->name('pengabdian.lolos-perlu-revisi');
+    Route::post('pengabdian/{pengabdian}/lolos', [App\Http\Controllers\AdminPengabdianController::class, 'setLolos'])->name('pengabdian.lolos');
+    Route::post('pengabdian/{pengabdian}/revisi-pra-final', [App\Http\Controllers\AdminPengabdianController::class, 'setRevisiPraFinal'])->name('pengabdian.revisi-pra-final');
+    Route::post('pengabdian/{pengabdian}/selesai', [App\Http\Controllers\AdminPengabdianController::class, 'setSelesai'])->name('pengabdian.selesai');
+
+    // Informasi/Berita admin CRUD (resource, slug parameter)
+    Route::resource('admin/informasi', App\Http\Controllers\AdminInformasiController::class)
+        ->parameters(['informasi' => 'slug'])
+        ->names('admin.informasi');
 });
 
+// auth routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

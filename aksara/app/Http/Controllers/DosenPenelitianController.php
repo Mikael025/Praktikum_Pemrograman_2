@@ -3,10 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Penelitian;
 use App\Models\PenelitianDocument;
+use App\Http\Requests\StorePenelitianRequest;
+use App\Http\Requests\UpdatePenelitianRequest;
+use App\Exceptions\WorkflowException;
+use App\Exceptions\UnauthorizedActionException;
+use App\Exceptions\DocumentUploadException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DosenPenelitianController extends Controller
 {
@@ -15,7 +22,9 @@ class DosenPenelitianController extends Controller
      */
     public function index()
     {
-        $penelitian = Auth::user()->penelitian()->latest()->get();
+        /** @var User $user */
+        $user = Auth::user();
+        $penelitian = $user->penelitian()->latest()->get();
         return view('dosen.penelitian.index', compact('penelitian'));
     }
 
@@ -30,22 +39,56 @@ class DosenPenelitianController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePenelitianRequest $request)
     {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'tahun' => 'required|integer|min:2020|max:2030',
-            'tim_peneliti' => 'required|string',
-            'sumber_dana' => 'required|string|max:255',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $validated['user_id'] = Auth::id();
-        $validated['tim_peneliti'] = json_encode(explode(',', $validated['tim_peneliti']));
-        $validated['status'] = 'draft';
+            $validated = $request->validated();
+            $validated['user_id'] = Auth::id();
+            $validated['tim_peneliti'] = json_encode(explode(',', $validated['tim_peneliti']));
+            $validated['status'] = 'diusulkan';
 
-        Penelitian::create($validated);
+            $penelitian = Penelitian::create($validated);
 
-        return redirect()->route('dosen.penelitian.index')->with('success', 'Penelitian berhasil ditambahkan.');
+            // Upload proposal file
+            if ($request->hasFile('proposal_file')) {
+                $file = $request->file('proposal_file');
+                $path = $file->store('penelitian/documents', 'public');
+
+                PenelitianDocument::create([
+                    'penelitian_id' => $penelitian->id,
+                    'jenis_dokumen' => 'proposal',
+                    'nama_file' => $file->getClientOriginalName(),
+                    'path_file' => $path,
+                    'uploaded_at' => now(),
+                ]);
+            }
+
+            // Upload optional supporting documents
+            if ($request->hasFile('dokumen_pendukung')) {
+                foreach ($request->file('dokumen_pendukung') as $file) {
+                    $path = $file->store('penelitian/documents', 'public');
+
+                    PenelitianDocument::create([
+                        'penelitian_id' => $penelitian->id,
+                        'jenis_dokumen' => 'dokumen_pendukung',
+                        'nama_file' => $file->getClientOriginalName(),
+                        'path_file' => $path,
+                        'uploaded_at' => now(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('dosen.penelitian.index')
+                ->with('success', 'Penelitian berhasil ditambahkan dan siap untuk diverifikasi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new DocumentUploadException('Gagal menyimpan penelitian: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -74,24 +117,102 @@ class DosenPenelitianController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Penelitian $penelitian)
+    public function update(UpdatePenelitianRequest $request, Penelitian $penelitian)
     {
-        if ($penelitian->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+        try {
+            if ($penelitian->user_id !== Auth::id()) {
+                throw new UnauthorizedActionException('update', $penelitian->status);
+            }
+
+            if (!$penelitian->canBeEditedByDosen()) {
+                throw new UnauthorizedActionException('update', $penelitian->status);
+            }
+
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+            $validated['tim_peneliti'] = json_encode(explode(',', $validated['tim_peneliti']));
+
+            $penelitian->update($validated);
+
+            // Handle file uploads
+            $this->handleFileUploads($request, $penelitian);
+
+            DB::commit();
+
+            return redirect()->route('dosen.penelitian.index')
+                ->with('success', 'Penelitian berhasil diperbarui.');
+
+        } catch (WorkflowException $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
-        
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'tahun' => 'required|integer|min:2020|max:2030',
-            'tim_peneliti' => 'required|string',
-            'sumber_dana' => 'required|string|max:255',
-        ]);
+    }
 
-        $validated['tim_peneliti'] = json_encode(explode(',', $validated['tim_peneliti']));
+    /**
+     * Handle file uploads for penelitian
+     */
+    private function handleFileUploads($request, Penelitian $penelitian)
+    {
+        // Upload proposal if provided
+        if ($request->hasFile('proposal_file')) {
+            $file = $request->file('proposal_file');
+            $path = $file->store('penelitian/documents', 'public');
 
-        $penelitian->update($validated);
+            PenelitianDocument::create([
+                'penelitian_id' => $penelitian->id,
+                'jenis_dokumen' => 'proposal',
+                'nama_file' => $file->getClientOriginalName(),
+                'path_file' => $path,
+                'uploaded_at' => now(),
+            ]);
+        }
 
-        return redirect()->route('dosen.penelitian.index')->with('success', 'Penelitian berhasil diperbarui.');
+        // Upload laporan akhir if provided
+        if ($request->hasFile('laporan_akhir_file')) {
+            $file = $request->file('laporan_akhir_file');
+            $path = $file->store('penelitian/documents', 'public');
+
+            PenelitianDocument::create([
+                'penelitian_id' => $penelitian->id,
+                'jenis_dokumen' => 'laporan_akhir',
+                'nama_file' => $file->getClientOriginalName(),
+                'path_file' => $path,
+                'uploaded_at' => now(),
+            ]);
+        }
+
+        // Upload sertifikat if provided
+        if ($request->hasFile('sertifikat_file')) {
+            $file = $request->file('sertifikat_file');
+            $path = $file->store('penelitian/documents', 'public');
+
+            PenelitianDocument::create([
+                'penelitian_id' => $penelitian->id,
+                'jenis_dokumen' => 'sertifikat',
+                'nama_file' => $file->getClientOriginalName(),
+                'path_file' => $path,
+                'uploaded_at' => now(),
+            ]);
+        }
+
+        // Upload supporting documents if provided
+        if ($request->hasFile('dokumen_pendukung')) {
+            foreach ($request->file('dokumen_pendukung') as $file) {
+                $path = $file->store('penelitian/documents', 'public');
+
+                PenelitianDocument::create([
+                    'penelitian_id' => $penelitian->id,
+                    'jenis_dokumen' => 'dokumen_pendukung',
+                    'nama_file' => $file->getClientOriginalName(),
+                    'path_file' => $path,
+                    'uploaded_at' => now(),
+                ]);
+            }
+        }
     }
 
     /**
@@ -99,48 +220,36 @@ class DosenPenelitianController extends Controller
      */
     public function destroy(Penelitian $penelitian)
     {
-        if ($penelitian->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        // Hapus dokumen terkait
-        foreach ($penelitian->documents as $document) {
-            Storage::disk('public')->delete($document->path_file);
-        }
-        
-        $penelitian->delete();
+        try {
+            if ($penelitian->user_id !== Auth::id()) {
+                throw new UnauthorizedActionException('delete', $penelitian->status);
+            }
 
-        return redirect()->route('dosen.penelitian.index')->with('success', 'Penelitian berhasil dihapus.');
+            if (!$penelitian->canBeDeleted()) {
+                throw new UnauthorizedActionException('delete', $penelitian->status);
+            }
+
+            DB::beginTransaction();
+
+            // Hapus dokumen terkait
+            foreach ($penelitian->documents as $document) {
+                Storage::disk('public')->delete($document->path_file);
+            }
+            
+            $penelitian->delete();
+
+            DB::commit();
+
+            return redirect()->route('dosen.penelitian.index')
+                ->with('success', 'Penelitian berhasil dihapus.');
+
+        } catch (WorkflowException $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 
-    /**
-     * Upload document for penelitian
-     */
-    public function uploadDocument(Request $request, Penelitian $penelitian)
-    {
-        if ($penelitian->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        $validated = $request->validate([
-            'jenis_dokumen' => 'required|in:proposal,laporan_akhir,sertifikat,dokumen_pendukung',
-            'file' => 'required|file|mimes:pdf,doc,docx|max:10240',
-        ]);
-
-        $file = $request->file('file');
-        $path = $file->store('penelitian/documents', 'public');
-
-        PenelitianDocument::create([
-            'penelitian_id' => $penelitian->id,
-            'jenis_dokumen' => $validated['jenis_dokumen'],
-            'nama_file' => $file->getClientOriginalName(),
-            'path_file' => $path,
-            'uploaded_at' => now(),
-        ]);
-
-        // Update status penelitian ke menunggu_verifikasi
-        $penelitian->update(['status' => 'menunggu_verifikasi']);
-
-        return back()->with('success', 'Dokumen berhasil diunggah dan penelitian siap untuk diverifikasi.');
-    }
 }
