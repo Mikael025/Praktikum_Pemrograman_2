@@ -9,7 +9,6 @@ use App\Models\PengabdianDocument;
 use App\Http\Requests\StorePengabdianRequest;
 use App\Http\Requests\UpdatePengabdianRequest;
 use App\Exceptions\WorkflowException;
-use App\Exceptions\UnauthorizedActionException;
 use App\Exceptions\DocumentUploadException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -20,11 +19,34 @@ class DosenPengabdianController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
-        $pengabdian = $user->pengabdian()->latest()->get();
+        $query = $user->pengabdian();
+        
+        // Filter tahun
+        if ($request->filled('year')) {
+            $query->where('tahun', $request->year);
+        }
+        
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('tim_pelaksana', 'like', "%{$search}%")
+                  ->orWhere('lokasi', 'like', "%{$search}%")
+                  ->orWhere('mitra', 'like', "%{$search}%");
+            });
+        }
+        
+        $pengabdian = $query->latest()->paginate(15);
         return view('dosen.pengabdian.index', compact('pengabdian'));
     }
 
@@ -46,7 +68,6 @@ class DosenPengabdianController extends Controller
 
             $validated = $request->validated();
             $validated['user_id'] = Auth::id();
-            $validated['tim_pelaksana'] = json_encode(explode(',', $validated['tim_pelaksana']));
             $validated['status'] = 'diusulkan';
 
             $pengabdian = Pengabdian::create($validated);
@@ -99,7 +120,7 @@ class DosenPengabdianController extends Controller
         if ($pengabdian->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
-        $pengabdian->load('documents');
+        $pengabdian->load(['documents', 'statusHistory.changedBy']);
         return view('dosen.pengabdian.show', compact('pengabdian'));
     }
 
@@ -121,19 +142,16 @@ class DosenPengabdianController extends Controller
     {
         try {
             if ($pengabdian->user_id !== Auth::id()) {
-                throw new UnauthorizedActionException('update', $pengabdian->status);
+                abort(403, 'Unauthorized action.');
             }
 
             if (!$pengabdian->canBeEditedByDosen()) {
-                throw new UnauthorizedActionException('update', $pengabdian->status);
+                return back()->withErrors(['error' => 'Pengabdian tidak dapat diedit pada status saat ini.']);
             }
 
             DB::beginTransaction();
 
-            $validated = $request->validated();
-            $validated['tim_pelaksana'] = json_encode(explode(',', $validated['tim_pelaksana']));
-
-            $pengabdian->update($validated);
+            $pengabdian->update($request->validated());
 
             // Handle file uploads
             $this->handleFileUploads($request, $pengabdian);
@@ -185,20 +203,6 @@ class DosenPengabdianController extends Controller
             ]);
         }
 
-        // Upload sertifikat if provided
-        if ($request->hasFile('sertifikat_file')) {
-            $file = $request->file('sertifikat_file');
-            $path = $file->store('pengabdian/documents', 'public');
-
-            PengabdianDocument::create([
-                'pengabdian_id' => $pengabdian->id,
-                'jenis_dokumen' => 'sertifikat',
-                'nama_file' => $file->getClientOriginalName(),
-                'path_file' => $path,
-                'uploaded_at' => now(),
-            ]);
-        }
-
         // Upload supporting documents if provided
         if ($request->hasFile('dokumen_pendukung')) {
             foreach ($request->file('dokumen_pendukung') as $file) {
@@ -222,11 +226,11 @@ class DosenPengabdianController extends Controller
     {
         try {
             if ($pengabdian->user_id !== Auth::id()) {
-                throw new UnauthorizedActionException('delete', $pengabdian->status);
+                abort(403, 'Unauthorized action.');
             }
 
             if (!$pengabdian->canBeDeleted()) {
-                throw new UnauthorizedActionException('delete', $pengabdian->status);
+                return back()->withErrors(['error' => 'Pengabdian tidak dapat dihapus pada status saat ini.']);
             }
 
             DB::beginTransaction();
@@ -246,6 +250,46 @@ class DosenPengabdianController extends Controller
         } catch (WorkflowException $e) {
             DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete a specific document
+     */
+    public function deleteDocument(Pengabdian $pengabdian, PengabdianDocument $document)
+    {
+        try {
+            // Check authorization: must be owner
+            if ($pengabdian->user_id !== Auth::id()) {
+                return back()->withErrors(['error' => 'Anda tidak memiliki akses untuk menghapus dokumen ini.']);
+            }
+
+            // Check if pengabdian is not selesai
+            if ($pengabdian->status === 'selesai') {
+                return back()->withErrors(['error' => 'Tidak dapat menghapus dokumen pada pengabdian yang sudah selesai.']);
+            }
+
+            // Check if document belongs to this pengabdian
+            if ($document->pengabdian_id !== $pengabdian->id) {
+                return back()->withErrors(['error' => 'Dokumen tidak ditemukan.']);
+            }
+
+            DB::beginTransaction();
+
+            // Delete file from storage
+            Storage::disk('public')->delete($document->path_file);
+
+            // Delete database record
+            $document->delete();
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', 'Dokumen berhasil dihapus.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);

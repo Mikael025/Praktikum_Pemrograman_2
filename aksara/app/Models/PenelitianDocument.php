@@ -15,10 +15,13 @@ class PenelitianDocument extends Model
         'nama_file',
         'path_file',
         'uploaded_at',
+        'tags',
+        'category',
     ];
 
     protected $casts = [
         'uploaded_at' => 'datetime',
+        'tags' => 'array',
     ];
 
     public function penelitian(): BelongsTo

@@ -53,7 +53,7 @@
 
                     <div>
                         <label for="tim_peneliti" class="block text-sm font-medium text-gray-700">Tim Peneliti</label>
-                        <textarea name="tim_peneliti" id="tim_peneliti" rows="3" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Masukkan nama-nama peneliti, dipisahkan dengan koma" required>{{ old('tim_peneliti', is_array($penelitian->tim_peneliti) ? implode(', ', $penelitian->tim_peneliti) : $penelitian->tim_peneliti) }}</textarea>
+                        <textarea name="tim_peneliti" id="tim_peneliti" rows="3" class="mt-1 block w-full rounded-md border-gray-300" placeholder="Masukkan nama-nama peneliti, dipisahkan dengan koma" required>{{ old('tim_peneliti', $penelitian->tim_peneliti) }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Contoh: Dr. John Doe, Prof. Jane Smith, M.Sc. Bob Wilson</p>
                         @error('tim_peneliti')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -81,11 +81,26 @@
                                 @endif
                             </label>
                             @if($penelitian->documents()->where('jenis_dokumen', 'proposal')->exists())
-                                <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                                @php
+                                    $proposalDoc = $penelitian->documents()->where('jenis_dokumen', 'proposal')->first();
+                                @endphp
+                                <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
                                     <p class="text-sm text-green-700">
                                         <strong>File sudah diupload:</strong> 
-                                        {{ $penelitian->documents()->where('jenis_dokumen', 'proposal')->first()->nama_file }}
+                                        {{ $proposalDoc->nama_file }}
                                     </p>
+                                    @if($penelitian->status !== 'selesai')
+                                        <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $proposalDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             @endif
                             <input type="file" name="proposal_file" id="proposal_file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx">
@@ -105,39 +120,31 @@
                                     @endif
                                 </label>
                                 @if($penelitian->documents()->where('jenis_dokumen', 'laporan_akhir')->exists())
-                                    <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                                    @php
+                                        $laporanDoc = $penelitian->documents()->where('jenis_dokumen', 'laporan_akhir')->first();
+                                    @endphp
+                                    <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
                                         <p class="text-sm text-green-700">
                                             <strong>File sudah diupload:</strong> 
-                                            {{ $penelitian->documents()->where('jenis_dokumen', 'laporan_akhir')->first()->nama_file }}
+                                            {{ $laporanDoc->nama_file }}
                                         </p>
+                                        @if($penelitian->status !== 'selesai')
+                                            <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $laporanDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 @endif
                                 <input type="file" name="laporan_akhir_file" id="laporan_akhir_file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx">
                                 <p class="mt-1 text-sm text-gray-500">Format: PDF, DOC, DOCX (maksimal 10MB)</p>
                                 @error('laporan_akhir_file')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <!-- Sertifikat File (conditional) -->
-                            <div class="mb-4">
-                                <label for="sertifikat_file" class="block text-sm font-medium text-gray-700">
-                                    File Sertifikat 
-                                    @if(!$penelitian->documents()->where('jenis_dokumen', 'sertifikat')->exists())
-                                        <span class="text-red-500">*</span>
-                                    @endif
-                                </label>
-                                @if($penelitian->documents()->where('jenis_dokumen', 'sertifikat')->exists())
-                                    <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-                                        <p class="text-sm text-green-700">
-                                            <strong>File sudah diupload:</strong> 
-                                            {{ $penelitian->documents()->where('jenis_dokumen', 'sertifikat')->first()->nama_file }}
-                                        </p>
-                                    </div>
-                                @endif
-                                <input type="file" name="sertifikat_file" id="sertifikat_file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx">
-                                <p class="mt-1 text-sm text-gray-500">Format: PDF, DOC, DOCX (maksimal 10MB)</p>
-                                @error('sertifikat_file')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -147,15 +154,27 @@
                         <div class="mb-4">
                             <label for="dokumen_pendukung" class="block text-sm font-medium text-gray-700">Dokumen Pendukung (Opsional)</label>
                             @if($penelitian->documents()->where('jenis_dokumen', 'dokumen_pendukung')->exists())
-                                <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                                    <p class="text-sm text-blue-700 mb-2">
-                                        <strong>Dokumen pendukung yang sudah diupload:</strong>
+                                <div class="mt-2 mb-2 space-y-2">
+                                    <p class="text-sm font-medium text-gray-700">
+                                        Dokumen pendukung yang sudah diupload:
                                     </p>
-                                    <ul class="text-sm text-blue-600 list-disc list-inside">
-                                        @foreach($penelitian->documents()->where('jenis_dokumen', 'dokumen_pendukung')->get() as $doc)
-                                            <li>{{ $doc->nama_file }}</li>
-                                        @endforeach
-                                    </ul>
+                                    @foreach($penelitian->documents()->where('jenis_dokumen', 'dokumen_pendukung')->get() as $doc)
+                                        <div class="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-md">
+                                            <span class="text-sm text-green-700">{{ $doc->nama_file }}</span>
+                                            @if($penelitian->status !== 'selesai')
+                                                <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $doc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
                             <input type="file" name="dokumen_pendukung[]" id="dokumen_pendukung" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept=".pdf,.doc,.docx">

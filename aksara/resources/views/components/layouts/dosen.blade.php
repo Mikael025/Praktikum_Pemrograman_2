@@ -27,6 +27,16 @@
                         <x-sidebar-link href="{{ route('dashboard.dosen') }}" :active="request()->routeIs('dashboard.dosen')">Dashboard</x-sidebar-link>
                         <x-sidebar-link href="{{ route('dosen.penelitian.index') }}" :active="request()->routeIs('dosen.penelitian.*')">Penelitian</x-sidebar-link>
                         <x-sidebar-link href="{{ route('dosen.pengabdian.index') }}" :active="request()->routeIs('dosen.pengabdian.*')">Pengabdian Masyarakat</x-sidebar-link>
+                        <div x-data="{ open: {{ request()->routeIs('dosen.laporan.*') ? 'true' : 'false' }} }" class="relative">
+                            <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-700 hover:text-white {{ request()->routeIs('dosen.laporan.*') ? 'bg-gray-700 text-white' : '' }}">
+                                Laporan & Rekap
+                                <svg class="ml-auto h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            <div x-show="open" @click.away="open=false" class="mt-1 ml-3 space-y-1">
+                                <x-sidebar-link href="{{ route('dosen.laporan.index') }}" :active="request()->routeIs('dosen.laporan.index')">Data Laporan</x-sidebar-link>
+                                <x-sidebar-link href="{{ route('dosen.laporan.perbandingan') }}" :active="request()->routeIs('dosen.laporan.perbandingan')">Perbandingan</x-sidebar-link>
+                            </div>
+                        </div>
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-700 hover:text-white">
                                 Informasi/Berita

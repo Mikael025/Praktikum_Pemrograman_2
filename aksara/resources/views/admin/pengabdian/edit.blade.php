@@ -40,14 +40,25 @@
                         <label for="status" class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
                         <select id="status" name="status" required
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="draft" {{ old('status', $pengabdian->status) === 'draft' ? 'selected' : '' }}>Draft</option>
-                            <option value="menunggu_verifikasi" {{ old('status', $pengabdian->status) === 'menunggu_verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                            <option value="terverifikasi" {{ old('status', $pengabdian->status) === 'terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
-                            <option value="ditolak" {{ old('status', $pengabdian->status) === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                            <option value="berjalan" {{ old('status', $pengabdian->status) === 'berjalan' ? 'selected' : '' }}>Berjalan</option>
+                            <option value="diusulkan" {{ old('status', $pengabdian->status) === 'diusulkan' ? 'selected' : '' }}>Diusulkan</option>
+                            <option value="tidak_lolos" {{ old('status', $pengabdian->status) === 'tidak_lolos' ? 'selected' : '' }}>Tidak Lolos</option>
+                            <option value="lolos_perlu_revisi" {{ old('status', $pengabdian->status) === 'lolos_perlu_revisi' ? 'selected' : '' }}>Lolos Perlu Revisi</option>
+                            <option value="lolos" {{ old('status', $pengabdian->status) === 'lolos' ? 'selected' : '' }}>Lolos</option>
+                            <option value="revisi_pra_final" {{ old('status', $pengabdian->status) === 'revisi_pra_final' ? 'selected' : '' }}>Revisi Pra Final</option>
                             <option value="selesai" {{ old('status', $pengabdian->status) === 'selesai' ? 'selected' : '' }}>Selesai</option>
                         </select>
                         @error('status')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="catatan_verifikasi" class="block text-sm font-medium text-gray-700">Catatan Verifikasi <span class="text-red-500">*</span></label>
+                        <textarea id="catatan_verifikasi" name="catatan_verifikasi" rows="3" required
+                                  placeholder="Jelaskan alasan perubahan status (minimal 10 karakter)"
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('catatan_verifikasi', $pengabdian->catatan_verifikasi) }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Catatan wajib diisi saat mengubah status pengabdian</p>
+                        @error('catatan_verifikasi')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -75,15 +86,6 @@
                         <input type="text" id="mitra" name="mitra" value="{{ old('mitra', $pengabdian->mitra) }}" required
                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         @error('mitra')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label for="catatan_verifikasi" class="block text-sm font-medium text-gray-700">Catatan Verifikasi</label>
-                        <textarea id="catatan_verifikasi" name="catatan_verifikasi" rows="3"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('catatan_verifikasi', $pengabdian->catatan_verifikasi) }}</textarea>
-                        @error('catatan_verifikasi')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

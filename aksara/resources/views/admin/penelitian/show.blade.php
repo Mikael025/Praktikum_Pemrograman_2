@@ -65,10 +65,72 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Catatan Verifikasi</label>
                     <p class="mt-1 text-sm text-gray-900">{{ $penelitian->catatan_verifikasi }}</p>
+                    @if($penelitian->updated_at)
+                    <p class="mt-1 text-xs text-gray-500">Terakhir diupdate: {{ $penelitian->updated_at->format('d M Y, H:i') }} WIB</p>
+                    @endif
                 </div>
                 @endif
             </div>
         </div>
+
+        <!-- Update Catatan Verifikasi (untuk status revisi) -->
+        @if(in_array($penelitian->status, ['lolos_perlu_revisi', 'revisi_pra_final']))
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <h2 class="text-lg font-semibold text-gray-900">Update Catatan Verifikasi</h2>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-blue-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-medium text-blue-800">Informasi</h3>
+                        <p class="text-sm text-blue-700 mt-1">
+                            Gunakan form ini untuk memberikan feedback tambahan kepada dosen tanpa mengubah status. 
+                            Dosen akan melihat timestamp terakhir catatan diupdate sebagai notifikasi ada perubahan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form action="{{ route('penelitian.update-catatan', $penelitian) }}" method="POST" class="space-y-4">
+                @csrf
+                @method('PATCH')
+                
+                <div>
+                    <label for="catatan_verifikasi_update" class="block text-sm font-medium text-gray-700">
+                        Catatan Verifikasi <span class="text-red-500">*</span>
+                    </label>
+                    <textarea 
+                        id="catatan_verifikasi_update" 
+                        name="catatan_verifikasi" 
+                        rows="4" 
+                        required
+                        placeholder="Berikan feedback yang jelas dan spesifik (minimal 10 karakter)..."
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    >{{ old('catatan_verifikasi', $penelitian->catatan_verifikasi) }}</textarea>
+                    @error('catatan_verifikasi')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-xs text-gray-500">Minimal 10 karakter untuk memastikan feedback berkualitas</p>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Simpan Catatan
+                    </button>
+                </div>
+            </form>
+        </div>
+        @endif
 
         <!-- Dokumen yang Diupload -->
         <div class="bg-white rounded-lg shadow p-6">
@@ -266,5 +328,8 @@
             @endif
         </div>
         @endif
+
+        <!-- Status History Timeline -->
+        <x-status-timeline :history="$penelitian->statusHistory" />
     </div>
 </x-layouts.admin>

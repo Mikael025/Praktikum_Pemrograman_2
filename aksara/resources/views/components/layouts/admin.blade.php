@@ -38,7 +38,16 @@
                                 <x-sidebar-link href="{{ route('admin.informasi.index', ['k' => 'umum']) }}" :active="request()->fullUrlIs(route('admin.informasi.index', ['k' => 'umum']))">Informasi Umum</x-sidebar-link>
                             </div>
                         </div>
-                        <x-sidebar-link href="#" :active="false">Laporan dan Rekap</x-sidebar-link>
+                        <div x-data="{ open: {{ request()->routeIs('admin.laporan.*') ? 'true' : 'false' }} }" class="relative">
+                            <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-700 hover:text-white {{ request()->routeIs('admin.laporan.*') ? 'bg-gray-700 text-white' : '' }}">
+                                Laporan & Rekap
+                                <svg class="ml-auto h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            <div x-show="open" @click.away="open=false" class="mt-1 ml-3 space-y-1">
+                                <x-sidebar-link href="{{ route('admin.laporan.index') }}" :active="request()->routeIs('admin.laporan.index')">Data Laporan</x-sidebar-link>
+                                <x-sidebar-link href="{{ route('admin.laporan.perbandingan') }}" :active="request()->routeIs('admin.laporan.perbandingan')">Perbandingan</x-sidebar-link>
+                            </div>
+                        </div>
                         <form method="POST" action="{{ route('logout') }}" class="pt-2">
                             @csrf
                             <button type="submit" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-700 hover:text-white">Logout</button>
