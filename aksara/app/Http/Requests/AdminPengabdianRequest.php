@@ -21,7 +21,7 @@ class AdminPengabdianRequest extends FormRequest
             'lokasi' => 'required|string|max:255',
             'mitra' => 'required|string|max:255',
             'status' => 'required|in:diusulkan,tidak_lolos,lolos_perlu_revisi,lolos,revisi_pra_final,selesai',
-            'catatan_verifikasi' => 'nullable|string|max:500'
+            'catatan_verifikasi' => 'required|string|min:10|max:500',
         ];
     }
 
@@ -41,7 +41,9 @@ class AdminPengabdianRequest extends FormRequest
             'mitra.max' => 'Mitra maksimal 255 karakter.',
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status tidak valid.',
-            'catatan_verifikasi.max' => 'Catatan verifikasi maksimal 500 karakter.'
+            'catatan_verifikasi.required' => 'Catatan verifikasi wajib diisi.',
+            'catatan_verifikasi.min' => 'Catatan verifikasi minimal 10 karakter.',
+            'catatan_verifikasi.max' => 'Catatan verifikasi maksimal 500 karakter.',
         ];
     }
 }

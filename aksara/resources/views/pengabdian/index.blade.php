@@ -48,48 +48,6 @@
                             <td class="px-4 py-3 text-right space-x-2">
                                 <a href="{{ route('pengabdian.show', $item) }}" class="text-indigo-600 hover:text-indigo-800">Lihat</a>
                                 <a href="{{ route('pengabdian.edit', $item) }}" class="text-yellow-600 hover:text-yellow-700">Edit</a>
-                                
-                                <!-- Aksi Verifikasi per Status -->
-                                @if($item->status === 'diusulkan')
-                                    <div class="inline-flex space-x-1">
-                                        <form action="{{ route('pengabdian.tidak-lolos', $item) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-red-600 hover:text-red-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin menolak pengabdian ini?')">Tolak</button>
-                                        </form>
-                                        <span class="text-gray-300">|</span>
-                                        <form action="{{ route('pengabdian.lolos-perlu-revisi', $item) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-yellow-600 hover:text-yellow-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin menyetujui dengan catatan revisi?')">Lolos Revisi</button>
-                                        </form>
-                                        <span class="text-gray-300">|</span>
-                                        <form action="{{ route('pengabdian.lolos', $item) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-green-600 hover:text-green-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin menyetujui pengabdian ini?')">Lolos</button>
-                                        </form>
-                                    </div>
-                                @elseif($item->status === 'lolos_perlu_revisi')
-                                    <form action="{{ route('pengabdian.lolos', $item) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="text-green-600 hover:text-green-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin menyetujui pengabdian ini?')">Lolos</button>
-                                    </form>
-                                @elseif($item->status === 'lolos')
-                                    <div class="inline-flex space-x-1">
-                                        <form action="{{ route('pengabdian.revisi-pra-final', $item) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-orange-600 hover:text-orange-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin meminta revisi pra-final?')">Revisi Pra-final</button>
-                                        </form>
-                                        <span class="text-gray-300">|</span>
-                                        <form action="{{ route('pengabdian.selesai', $item) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-emerald-600 hover:text-emerald-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin menandai pengabdian ini sebagai selesai?')">Selesai</button>
-                                        </form>
-                                    </div>
-                                @elseif($item->status === 'revisi_pra_final')
-                                    <form action="{{ route('pengabdian.selesai', $item) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="text-emerald-600 hover:text-emerald-700 text-sm" onclick="return confirm('Apakah Anda yakin ingin menandai pengabdian ini sebagai selesai?')">Selesai</button>
-                                    </form>
-                                @endif
                             </td>
                         </tr>
                         @empty

@@ -9,7 +9,6 @@ use App\Models\PenelitianDocument;
 use App\Http\Requests\StorePenelitianRequest;
 use App\Http\Requests\UpdatePenelitianRequest;
 use App\Exceptions\WorkflowException;
-use App\Exceptions\UnauthorizedActionException;
 use App\Exceptions\DocumentUploadException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -20,11 +19,33 @@ class DosenPenelitianController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
-        $penelitian = $user->penelitian()->latest()->get();
+        $query = $user->penelitian();
+        
+        // Filter tahun
+        if ($request->filled('year')) {
+            $query->where('tahun', $request->year);
+        }
+        
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('tim_peneliti', 'like', "%{$search}%")
+                  ->orWhere('sumber_dana', 'like', "%{$search}%");
+            });
+        }
+        
+        $penelitian = $query->latest()->paginate(15);
         return view('dosen.penelitian.index', compact('penelitian'));
     }
 
@@ -46,7 +67,6 @@ class DosenPenelitianController extends Controller
 
             $validated = $request->validated();
             $validated['user_id'] = Auth::id();
-            $validated['tim_peneliti'] = json_encode(explode(',', $validated['tim_peneliti']));
             $validated['status'] = 'diusulkan';
 
             $penelitian = Penelitian::create($validated);
@@ -99,7 +119,7 @@ class DosenPenelitianController extends Controller
         if ($penelitian->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
-        $penelitian->load('documents');
+        $penelitian->load(['documents', 'statusHistory.changedBy']);
         return view('dosen.penelitian.show', compact('penelitian'));
     }
 
@@ -121,19 +141,16 @@ class DosenPenelitianController extends Controller
     {
         try {
             if ($penelitian->user_id !== Auth::id()) {
-                throw new UnauthorizedActionException('update', $penelitian->status);
+                abort(403, 'Unauthorized action.');
             }
 
             if (!$penelitian->canBeEditedByDosen()) {
-                throw new UnauthorizedActionException('update', $penelitian->status);
+                return back()->withErrors(['error' => 'Penelitian tidak dapat diedit pada status saat ini.']);
             }
 
             DB::beginTransaction();
 
-            $validated = $request->validated();
-            $validated['tim_peneliti'] = json_encode(explode(',', $validated['tim_peneliti']));
-
-            $penelitian->update($validated);
+            $penelitian->update($request->validated());
 
             // Handle file uploads
             $this->handleFileUploads($request, $penelitian);
@@ -185,20 +202,6 @@ class DosenPenelitianController extends Controller
             ]);
         }
 
-        // Upload sertifikat if provided
-        if ($request->hasFile('sertifikat_file')) {
-            $file = $request->file('sertifikat_file');
-            $path = $file->store('penelitian/documents', 'public');
-
-            PenelitianDocument::create([
-                'penelitian_id' => $penelitian->id,
-                'jenis_dokumen' => 'sertifikat',
-                'nama_file' => $file->getClientOriginalName(),
-                'path_file' => $path,
-                'uploaded_at' => now(),
-            ]);
-        }
-
         // Upload supporting documents if provided
         if ($request->hasFile('dokumen_pendukung')) {
             foreach ($request->file('dokumen_pendukung') as $file) {
@@ -222,11 +225,11 @@ class DosenPenelitianController extends Controller
     {
         try {
             if ($penelitian->user_id !== Auth::id()) {
-                throw new UnauthorizedActionException('delete', $penelitian->status);
+                abort(403, 'Unauthorized action.');
             }
 
             if (!$penelitian->canBeDeleted()) {
-                throw new UnauthorizedActionException('delete', $penelitian->status);
+                return back()->withErrors(['error' => 'Penelitian tidak dapat dihapus pada status saat ini.']);
             }
 
             DB::beginTransaction();
@@ -246,6 +249,46 @@ class DosenPenelitianController extends Controller
         } catch (WorkflowException $e) {
             DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete a specific document
+     */
+    public function deleteDocument(Penelitian $penelitian, PenelitianDocument $document)
+    {
+        try {
+            // Check authorization: must be owner
+            if ($penelitian->user_id !== Auth::id()) {
+                return back()->withErrors(['error' => 'Anda tidak memiliki akses untuk menghapus dokumen ini.']);
+            }
+
+            // Check if penelitian is not selesai
+            if ($penelitian->status === 'selesai') {
+                return back()->withErrors(['error' => 'Tidak dapat menghapus dokumen pada penelitian yang sudah selesai.']);
+            }
+
+            // Check if document belongs to this penelitian
+            if ($document->penelitian_id !== $penelitian->id) {
+                return back()->withErrors(['error' => 'Dokumen tidak ditemukan.']);
+            }
+
+            DB::beginTransaction();
+
+            // Delete file from storage
+            Storage::disk('public')->delete($document->path_file);
+
+            // Delete database record
+            $document->delete();
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', 'Dokumen berhasil dihapus.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);

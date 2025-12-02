@@ -29,50 +29,18 @@
                             <tr>
                                 <td class="px-4 py-3 text-gray-900">{{ $item->judul }}</td>
                                 <td class="px-4 py-3 text-gray-900">{{ $item->tahun }}</td>
-                                <td class="px-4 py-3 text-gray-900">
-                                    @if(is_array($item->tim_peneliti))
-                                        {{ implode(', ', $item->tim_peneliti) }}
-                                    @else
-                                        {{ $item->tim_peneliti }}
-                                    @endif
-                                </td>
+                                <td class="px-4 py-3 text-gray-900">{{ $item->tim_peneliti }}</td>
                                 <td class="px-4 py-3 text-gray-900">{{ $item->sumber_dana }}</td>
                                 <td class="px-4 py-3">
-                                    @php
-                                        $statusColors = [
-                                            'draft' => 'bg-gray-100 text-gray-700',
-                                            'menunggu_verifikasi' => 'bg-yellow-100 text-yellow-700',
-                                            'terverifikasi' => 'bg-green-100 text-green-700',
-                                            'ditolak' => 'bg-red-100 text-red-700',
-                                            'berjalan' => 'bg-blue-100 text-blue-700',
-                                            'selesai' => 'bg-purple-100 text-purple-700',
-                                        ];
-                                        $statusLabels = [
-                                            'draft' => 'Draft',
-                                            'menunggu_verifikasi' => 'Menunggu Verifikasi',
-                                            'terverifikasi' => 'Terverifikasi',
-                                            'ditolak' => 'Ditolak',
-                                            'berjalan' => 'Berjalan',
-                                            'selesai' => 'Selesai',
-                                        ];
-                                    @endphp
-                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs {{ $statusColors[$item->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ $statusLabels[$item->status] ?? ucfirst($item->status) }}
-                                    </span>
+                                    <x-status-badge :status="$item->status" />
                                 </td>
                                 <td class="px-4 py-3 text-right space-x-2">
                                     <a href="{{ route('dosen.penelitian.show', $item) }}" class="text-indigo-600 hover:text-indigo-800">Lihat</a>
                                     
-                                    @if($item->canBeEditedByDosen())
+                                    @if(in_array($item->status, ['lolos', 'revisi_pra_final']))
+                                        <a href="{{ route('dosen.penelitian.edit', $item) }}" class="text-green-600 hover:text-green-700 font-medium">Finalisasi</a>
+                                    @elseif($item->canBeEditedByDosen())
                                         <a href="{{ route('dosen.penelitian.edit', $item) }}" class="text-yellow-600 hover:text-yellow-700">Edit</a>
-                                    @endif
-                                    
-                                    @if($item->canBeDeleted())
-                                        <form method="POST" action="{{ route('dosen.penelitian.destroy', $item) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus penelitian ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-700">Hapus</button>
-                                        </form>
                                     @endif
                                 </td>
                             </tr>
@@ -86,6 +54,11 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="mt-4">
+            {{ $penelitian->links() }}
         </div>
     </div>
 

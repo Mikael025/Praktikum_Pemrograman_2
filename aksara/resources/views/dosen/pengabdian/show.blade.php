@@ -27,13 +27,7 @@
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Tim Pelaksana</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                @if(is_array($pengabdian->tim_pelaksana))
-                                    {{ implode(', ', $pengabdian->tim_pelaksana) }}
-                                @else
-                                    {{ $pengabdian->tim_pelaksana }}
-                                @endif
-                            </dd>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $pengabdian->tim_pelaksana }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Lokasi</dt>
@@ -46,27 +40,7 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Status</dt>
                             <dd class="mt-1">
-                                @php
-                                    $statusColors = [
-                                        'draft' => 'bg-gray-100 text-gray-700',
-                                        'menunggu_verifikasi' => 'bg-yellow-100 text-yellow-700',
-                                        'terverifikasi' => 'bg-green-100 text-green-700',
-                                        'ditolak' => 'bg-red-100 text-red-700',
-                                        'berjalan' => 'bg-blue-100 text-blue-700',
-                                        'selesai' => 'bg-purple-100 text-purple-700',
-                                    ];
-                                    $statusLabels = [
-                                        'draft' => 'Draft',
-                                        'menunggu_verifikasi' => 'Menunggu Verifikasi',
-                                        'terverifikasi' => 'Terverifikasi',
-                                        'ditolak' => 'Ditolak',
-                                        'berjalan' => 'Berjalan',
-                                        'selesai' => 'Selesai',
-                                    ];
-                                @endphp
-                                <span class="inline-flex items-center px-2 py-1 rounded text-xs {{ $statusColors[$pengabdian->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                    {{ $statusLabels[$pengabdian->status] ?? ucfirst($pengabdian->status) }}
-                                </span>
+                                <x-status-badge :status="$pengabdian->status" />
                             </dd>
                         </div>
                     </dl>
@@ -92,5 +66,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Status History Timeline -->
+        <x-status-timeline :history="$pengabdian->statusHistory" />
     </div>
 </x-layouts.dosen>

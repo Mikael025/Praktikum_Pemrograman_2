@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengabdian;
+use App\Models\StatusHistory;
 use App\Models\User;
 use App\Http\Requests\AdminPengabdianRequest;
 use App\Exceptions\WorkflowException;
 use App\Exceptions\InvalidStatusTransitionException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminPengabdianController extends Controller
 {
@@ -46,7 +49,7 @@ class AdminPengabdianController extends Controller
     
     public function show(Pengabdian $pengabdian)
     {
-        $pengabdian->load(['user', 'documents']);
+        $pengabdian->load(['user', 'documents', 'statusHistory.changedBy']);
         return view('admin.pengabdian.show', compact('pengabdian'));
     }
     
@@ -58,6 +61,8 @@ class AdminPengabdianController extends Controller
     
     public function update(AdminPengabdianRequest $request, Pengabdian $pengabdian)
     {
+        // Admin dapat mengubah status tanpa validasi workflow
+        // Catatan verifikasi wajib diisi (sudah divalidasi di request)
         $pengabdian->update($request->validated());
         
         return redirect()->route('pengabdian.index')
@@ -88,9 +93,20 @@ class AdminPengabdianController extends Controller
 
             DB::beginTransaction();
 
+            $oldStatus = $pengabdian->status;
+            
             $pengabdian->update([
                 'status' => 'tidak_lolos',
                 'catatan_verifikasi' => $request->catatan
+            ]);
+
+            StatusHistory::create([
+                'statusable_type' => Pengabdian::class,
+                'statusable_id' => $pengabdian->id,
+                'old_status' => $oldStatus,
+                'new_status' => 'tidak_lolos',
+                'changed_by_user_id' => Auth::id(),
+                'notes' => $request->catatan
             ]);
 
             DB::commit();
@@ -123,15 +139,26 @@ class AdminPengabdianController extends Controller
 
             DB::beginTransaction();
 
+            $oldStatus = $pengabdian->status;
+            
             $pengabdian->update([
                 'status' => 'lolos_perlu_revisi',
                 'catatan_verifikasi' => $request->catatan
             ]);
 
+            StatusHistory::create([
+                'statusable_type' => Pengabdian::class,
+                'statusable_id' => $pengabdian->id,
+                'old_status' => $oldStatus,
+                'new_status' => 'lolos_perlu_revisi',
+                'changed_by_user_id' => Auth::id(),
+                'notes' => $request->catatan
+            ]);
+
             DB::commit();
 
             return redirect()->route('pengabdian.index')
-                ->with('success', 'Pengabdian lolos dengan catatan revisi.');
+                ->with('success', 'Pengabdian lolos dengan revisi.');
 
         } catch (WorkflowException $e) {
             DB::rollBack();
@@ -158,9 +185,20 @@ class AdminPengabdianController extends Controller
 
             DB::beginTransaction();
 
+            $oldStatus = $pengabdian->status;
+            
             $pengabdian->update([
                 'status' => 'lolos',
-                'catatan_verifikasi' => $request->catatan
+                'catatan_verifikasi' => $request->catatan ?? 'Lolos'
+            ]);
+
+            StatusHistory::create([
+                'statusable_type' => Pengabdian::class,
+                'statusable_id' => $pengabdian->id,
+                'old_status' => $oldStatus,
+                'new_status' => 'lolos',
+                'changed_by_user_id' => Auth::id(),
+                'notes' => $request->catatan ?? 'Lolos'
             ]);
 
             DB::commit();
@@ -193,15 +231,26 @@ class AdminPengabdianController extends Controller
 
             DB::beginTransaction();
 
+            $oldStatus = $pengabdian->status;
+            
             $pengabdian->update([
                 'status' => 'revisi_pra_final',
                 'catatan_verifikasi' => $request->catatan
             ]);
 
+            StatusHistory::create([
+                'statusable_type' => Pengabdian::class,
+                'statusable_id' => $pengabdian->id,
+                'old_status' => $oldStatus,
+                'new_status' => 'revisi_pra_final',
+                'changed_by_user_id' => Auth::id(),
+                'notes' => $request->catatan
+            ]);
+
             DB::commit();
 
             return redirect()->route('pengabdian.index')
-                ->with('success', 'Pengabdian memerlukan revisi pra-final.');
+                ->with('success', 'Pengabdian diminta revisi pra-final.');
 
         } catch (WorkflowException $e) {
             DB::rollBack();
@@ -228,19 +277,79 @@ class AdminPengabdianController extends Controller
 
             DB::beginTransaction();
 
+            $oldStatus = $pengabdian->status;
+            
             $pengabdian->update([
                 'status' => 'selesai',
-                'catatan_verifikasi' => $request->catatan
+                'catatan_verifikasi' => 'Pengabdian selesai'
+            ]);
+
+            StatusHistory::create([
+                'statusable_type' => Pengabdian::class,
+                'statusable_id' => $pengabdian->id,
+                'old_status' => $oldStatus,
+                'new_status' => 'selesai',
+                'changed_by_user_id' => Auth::id(),
+                'notes' => 'Pengabdian selesai'
             ]);
 
             DB::commit();
 
             return redirect()->route('pengabdian.index')
-                ->with('success', 'Pengabdian telah selesai.');
+                ->with('success', 'Pengabdian berhasil diselesaikan.');
 
         } catch (WorkflowException $e) {
             DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update catatan verifikasi without changing status
+     * Untuk memberikan feedback tambahan pada status revisi
+     */
+    public function updateCatatanVerifikasi(Request $request, Pengabdian $pengabdian)
+    {
+        try {
+            // Validate that catatan has minimum quality
+            $request->validate([
+                'catatan_verifikasi' => 'required|string|min:10|max:500'
+            ], [
+                'catatan_verifikasi.required' => 'Catatan verifikasi wajib diisi.',
+                'catatan_verifikasi.min' => 'Catatan verifikasi minimal 10 karakter untuk memastikan feedback berkualitas.',
+                'catatan_verifikasi.max' => 'Catatan verifikasi maksimal 500 karakter.'
+            ]);
+
+            DB::beginTransaction();
+
+            $oldCatatan = $pengabdian->catatan_verifikasi;
+            
+            $pengabdian->update([
+                'catatan_verifikasi' => $request->catatan_verifikasi
+            ]);
+
+            // Log for audit trail
+            Log::info('Catatan verifikasi updated', [
+                'admin_id' => auth()->id(),
+                'admin_name' => auth()->user()->name,
+                'pengabdian_id' => $pengabdian->id,
+                'pengabdian_judul' => $pengabdian->judul,
+                'status' => $pengabdian->status,
+                'old_catatan' => $oldCatatan,
+                'new_catatan' => $request->catatan_verifikasi,
+                'timestamp' => now()
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', 'Catatan verifikasi berhasil diperbarui.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);

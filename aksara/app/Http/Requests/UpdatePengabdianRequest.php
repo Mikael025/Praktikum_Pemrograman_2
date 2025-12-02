@@ -43,9 +43,8 @@ class UpdatePengabdianRequest extends FormRequest
         if ($pengabdian->requiresFinalDocuments()) {
             if (!$pengabdian->documents()->where('jenis_dokumen', 'laporan_akhir')->exists()) {
                 $rules['laporan_akhir_file'] = 'required|file|mimes:pdf,doc,docx|max:10240';
-            }
-            if (!$pengabdian->documents()->where('jenis_dokumen', 'sertifikat')->exists()) {
-                $rules['sertifikat_file'] = 'required|file|mimes:pdf,doc,docx|max:10240';
+            } else {
+                $rules['laporan_akhir_file'] = 'nullable|file|mimes:pdf,doc,docx|max:10240';
             }
         }
 
@@ -79,10 +78,6 @@ class UpdatePengabdianRequest extends FormRequest
             'laporan_akhir_file.file' => 'File laporan akhir harus berupa file.',
             'laporan_akhir_file.mimes' => 'File laporan akhir harus berupa PDF, DOC, atau DOCX.',
             'laporan_akhir_file.max' => 'File laporan akhir maksimal 10MB.',
-            'sertifikat_file.required' => 'File sertifikat wajib diupload.',
-            'sertifikat_file.file' => 'File sertifikat harus berupa file.',
-            'sertifikat_file.mimes' => 'File sertifikat harus berupa PDF, DOC, atau DOCX.',
-            'sertifikat_file.max' => 'File sertifikat maksimal 10MB.',
             'dokumen_pendukung.*.file' => 'Dokumen pendukung harus berupa file.',
             'dokumen_pendukung.*.mimes' => 'Dokumen pendukung harus berupa PDF, DOC, atau DOCX.',
             'dokumen_pendukung.*.max' => 'Dokumen pendukung maksimal 10MB.',
