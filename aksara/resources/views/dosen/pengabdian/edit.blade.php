@@ -194,5 +194,37 @@
                 </div>
             </form>
         </div>
+
+        <!-- Upload Versi Baru Dokumen -->
+        @php
+            $proposalDoc = $pengabdian->documents()->where('jenis_dokumen', 'proposal')->first();
+            $laporanDoc = $pengabdian->documents()->where('jenis_dokumen', 'laporan_akhir')->first();
+        @endphp
+
+        @if($proposalDoc || $laporanDoc)
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <h2 class="text-lg font-semibold text-gray-900">Upload Versi Baru Dokumen</h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-6">Gunakan form di bawah untuk mengupload versi baru dari dokumen yang sudah ada. Versi lama akan disimpan dalam riwayat.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                @if($proposalDoc)
+                    <x-upload-version-form :document="$proposalDoc" type="pengabdian" />
+                @endif
+
+                @if($laporanDoc)
+                    <x-upload-version-form :document="$laporanDoc" type="pengabdian" />
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
+
+    <!-- Modals -->
+    <x-pdf-preview-modal />
+    <x-version-history-modal />
 </x-layouts.dosen>

@@ -192,5 +192,34 @@
                 </div>
             </form>
         </div>
+
+        <!-- Upload New Version Section -->
+        @if($penelitian->documents->count() > 0)
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    Upload Versi Baru Dokumen
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Upload versi baru dari dokumen yang sudah ada. Versi lama akan disimpan dalam riwayat.
+                </p>
+
+                <div class="space-y-4">
+                    @foreach($penelitian->documents as $document)
+                        @if(in_array($document->jenis_dokumen, ['proposal', 'laporan_akhir']))
+                            <x-upload-version-form :document="$document" type="penelitian" />
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
+
+    <!-- PDF Preview Modal -->
+    <x-pdf-preview-modal />
+
+    <!-- Version History Modal -->
+    <x-version-history-modal />
 </x-layouts.dosen>

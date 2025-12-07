@@ -140,16 +140,59 @@
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900">Dokumen yang Diupload</h2>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {{ $pengabdian->documents->count() }} dokumen
-                </span>
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ $pengabdian->documents->count() }} dokumen
+                    </span>
+                    @if($pengabdian->documents->count() > 0)
+                        <a href="{{ route('pengabdian.documents.download-zip', $pengabdian->id) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Download Semua (ZIP)
+                        </a>
+                    @endif
+                </div>
             </div>
             
             @if($pengabdian->documents->count() > 0)
-                <div class="space-y-4">
-                    @foreach($pengabdian->documents as $document)
-                        <x-document-item :document="$document" type="pengabdian" />
-                    @endforeach
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Document Checklist -->
+                    <div class="md:col-span-1">
+                        <x-document-checklist :documents="$pengabdian->documents" type="pengabdian" />
+                    </div>
+
+                    <!-- Document Items -->
+                    <div class="md:col-span-2">
+                        <div class="space-y-4">
+                            @foreach($pengabdian->documents as $document)
+                                <div class="relative">
+                                    <x-document-item-enhanced :document="$document" type="pengabdian" />
+                                    
+                                    <!-- Admin Verification Actions -->
+                                    @if($document->verification_status === 'pending')
+                                    <div class="mt-2 flex items-center space-x-2">
+                                        <form action="{{ route('documents.verify', ['type' => 'pengabdian', 'document' => $document->id]) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                Verifikasi
+                                            </button>
+                                        </form>
+                                        <button onclick="confirmReject({{ $document->id }}, 'pengabdian')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            Tolak
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             @else
                 <div class="text-center py-8">
@@ -336,4 +379,34 @@
         <!-- Status History Timeline -->
         <x-status-timeline :history="$pengabdian->statusHistory" />
     </div>
+
+    <!-- Modals -->
+    <x-pdf-preview-modal />
+    <x-version-history-modal />
+
+    <script>
+    function confirmReject(documentId, type) {
+        const reason = prompt('Masukkan alasan penolakan dokumen:');
+        if (reason && reason.trim() !== '') {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/documents/${type}/${documentId}/reject`;
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            
+            const reasonInput = document.createElement('input');
+            reasonInput.type = 'hidden';
+            reasonInput.name = 'rejection_reason';
+            reasonInput.value = reason;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(reasonInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    </script>
 </x-layouts.admin>

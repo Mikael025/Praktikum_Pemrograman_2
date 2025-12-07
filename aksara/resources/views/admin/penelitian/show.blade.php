@@ -136,26 +136,82 @@
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900">Dokumen yang Diupload</h2>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {{ $penelitian->documents->count() }} dokumen
-                </span>
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ $penelitian->documents->count() }} dokumen
+                    </span>
+                    @if($penelitian->documents->count() > 0)
+                        <a href="{{ route('penelitian.documents.download-zip', $penelitian->id) }}" 
+                           class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Download All (ZIP)
+                        </a>
+                    @endif
+                </div>
             </div>
-            
-            @if($penelitian->documents->count() > 0)
-                <div class="space-y-4">
-                    @foreach($penelitian->documents as $document)
-                        <x-document-item :document="$document" type="penelitian" />
-                    @endforeach
+
+            <!-- Document Checklist and List -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1">
+                    <x-document-checklist :documents="$penelitian->documents" type="penelitian" />
                 </div>
-            @else
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada dokumen</h3>
-                    <p class="mt-1 text-sm text-gray-500">Dosen belum mengupload dokumen pendukung untuk penelitian ini.</p>
+                
+                <div class="lg:col-span-2">
+                    @if($penelitian->documents->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($penelitian->documents as $document)
+                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                    <x-document-item-enhanced :document="$document" type="penelitian" />
+                                    
+                                    <!-- Admin Verification Actions -->
+                                    @if($document->isPending())
+                                        <div class="mt-4 pt-4 border-t border-gray-200 flex items-center justify-end space-x-2">
+                                            <!-- Reject Form -->
+                                            <form action="{{ route('documents.reject', ['type' => 'penelitian', 'document' => $document->id]) }}" 
+                                                  method="POST" 
+                                                  onsubmit="return confirmReject(event, this)">
+                                                @csrf
+                                                <input type="hidden" name="rejection_reason" id="rejection_reason_{{ $document->id }}">
+                                                <button type="submit" 
+                                                        class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                    Tolak
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Verify Form -->
+                                            <form action="{{ route('documents.verify', ['type' => 'penelitian', 'document' => $document->id]) }}" 
+                                                  method="POST" 
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin memverifikasi dokumen ini?')">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="inline-flex items-center px-3 py-1.5 border border-green-300 shadow-sm text-sm font-medium rounded text-green-700 bg-white hover:bg-green-50">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    Verifikasi
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada dokumen</h3>
+                            <p class="mt-1 text-sm text-gray-500">Dosen belum mengupload dokumen pendukung untuk penelitian ini.</p>
+                        </div>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
 
         <!-- Form Verifikasi Dokumen -->
@@ -331,5 +387,25 @@
 
         <!-- Status History Timeline -->
         <x-status-timeline :history="$penelitian->statusHistory" />
+
+        <!-- PDF Preview Modal -->
+        <x-pdf-preview-modal />
+
+        <!-- Version History Modal -->
+        <x-version-history-modal />
+
+        <script>
+            function confirmReject(event, form) {
+                event.preventDefault();
+                const reason = prompt('Masukkan alasan penolakan dokumen:');
+                if (reason && reason.trim().length > 0) {
+                    const documentId = form.querySelector('input[name="rejection_reason"]').id.split('_').pop();
+                    form.querySelector('input[name="rejection_reason"]').value = reason.trim();
+                    form.submit();
+                    return true;
+                }
+                return false;
+            }
+        </script>
     </div>
 </x-layouts.admin>

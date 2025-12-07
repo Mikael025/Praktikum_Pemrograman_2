@@ -54,6 +54,11 @@ Route::middleware(['auth', 'verified', 'role:dosen'])->group(function () {
     Route::get('/dosen/laporan/export-csv', [App\Http\Controllers\DosenLaporanController::class, 'exportCsv'])->name('dosen.laporan.export-csv');
     Route::get('/dosen/laporan/perbandingan', [App\Http\Controllers\DosenLaporanController::class, 'perbandingan'])->name('dosen.laporan.perbandingan');
 
+    // Document Management - Dosen
+    Route::post('/documents/{type}/{document}/upload-version', [App\Http\Controllers\DocumentController::class, 'uploadVersion'])->name('documents.upload-version');
+    Route::get('/documents/{type}/{document}/versions', [App\Http\Controllers\DocumentController::class, 'getVersionHistory'])->name('documents.versions');
+    Route::get('/penelitian/{id}/documents/download-zip', [App\Http\Controllers\DocumentController::class, 'downloadAllAsZip'])->name('penelitian.documents.download-zip');
+    Route::get('/pengabdian/{id}/documents/download-zip', [App\Http\Controllers\DocumentController::class, 'downloadAllAsZip'])->name('pengabdian.documents.download-zip');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -89,6 +94,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/laporan/export-pdf', [App\Http\Controllers\AdminLaporanController::class, 'exportPdf'])->name('admin.laporan.export-pdf');
     Route::get('/admin/laporan/export-csv', [App\Http\Controllers\AdminLaporanController::class, 'exportCsv'])->name('admin.laporan.export-csv');
     Route::get('/admin/laporan/perbandingan', [App\Http\Controllers\AdminLaporanController::class, 'perbandingan'])->name('admin.laporan.perbandingan');
+
+    // Document Management - Admin
+    Route::post('/documents/{type}/{document}/verify', [App\Http\Controllers\DocumentController::class, 'verify'])->name('documents.verify');
+    Route::post('/documents/{type}/{document}/reject', [App\Http\Controllers\DocumentController::class, 'reject'])->name('documents.reject');
 });
 
 // auth routes
