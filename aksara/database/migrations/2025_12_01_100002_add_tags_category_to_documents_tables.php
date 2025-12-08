@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('penelitian_documents', function (Blueprint $table) {
-            $table->json('tags')->nullable()->after('uploaded_at');
-            $table->string('category')->nullable()->after('tags');
-        });
+        if (! Schema::hasColumn('penelitian_documents', 'tags')) {
+            Schema::table('penelitian_documents', function (Blueprint $table) {
+                $table->json('tags')->nullable()->after('uploaded_at');
+                $table->string('category')->nullable()->after('tags');
+            });
+        }
 
-        Schema::table('pengabdian_documents', function (Blueprint $table) {
-            $table->json('tags')->nullable()->after('uploaded_at');
-            $table->string('category')->nullable()->after('tags');
-        });
+        if (! Schema::hasColumn('pengabdian_documents', 'tags')) {
+            Schema::table('pengabdian_documents', function (Blueprint $table) {
+                $table->json('tags')->nullable()->after('uploaded_at');
+                $table->string('category')->nullable()->after('tags');
+            });
+        }
     }
 
     /**
