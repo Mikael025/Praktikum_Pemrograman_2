@@ -1,7 +1,7 @@
 <x-layouts.admin>
     <div class="space-y-6">
         <h1 class="text-xl font-semibold text-gray-900">Edit Informasi</h1>
-        <form method="POST" action="{{ route('admin.informasi.update', $informasi->slug) }}" class="bg-white p-6 rounded-lg shadow space-y-4">
+        <form method="POST" action="{{ route('admin.informasi.update', $informasi->slug) }}" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow space-y-4">
             @method('PUT')
             @include('admin.informasi._form')
             <div class="flex items-center gap-2">

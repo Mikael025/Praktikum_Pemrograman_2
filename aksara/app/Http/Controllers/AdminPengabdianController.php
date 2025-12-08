@@ -54,7 +54,7 @@ class AdminPengabdianController extends Controller
 
         $pengabdian = $query->orderBy('created_at', 'desc')->paginate(15);
         
-        return view('pengabdian.index', compact('pengabdian', 'pengabdianStats'));
+        return view('admin.pengabdian.index', compact('pengabdian', 'pengabdianStats'));
     }
     
     public function show(Pengabdian $pengabdian)
@@ -75,7 +75,7 @@ class AdminPengabdianController extends Controller
         // Catatan verifikasi wajib diisi (sudah divalidasi di request)
         $pengabdian->update($request->validated());
         
-        return redirect()->route('pengabdian.index')
+        return redirect()->route('admin.pengabdian.index')
             ->with('success', 'Pengabdian berhasil diperbarui.');
     }
     
@@ -83,7 +83,7 @@ class AdminPengabdianController extends Controller
     {
         $pengabdian->delete();
         
-        return redirect()->route('pengabdian.index')
+        return redirect()->route('admin.pengabdian.index')
             ->with('success', 'Pengabdian berhasil dihapus.');
     }
     
@@ -121,7 +121,7 @@ class AdminPengabdianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pengabdian.index')
+            return redirect()->route('admin.pengabdian.index')
                 ->with('success', 'Pengabdian berhasil ditolak.');
 
         } catch (WorkflowException $e) {
@@ -167,7 +167,7 @@ class AdminPengabdianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pengabdian.index')
+            return redirect()->route('admin.pengabdian.index')
                 ->with('success', 'Pengabdian lolos dengan revisi.');
 
         } catch (WorkflowException $e) {
@@ -213,7 +213,7 @@ class AdminPengabdianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pengabdian.index')
+            return redirect()->route('admin.pengabdian.index')
                 ->with('success', 'Pengabdian berhasil disetujui.');
 
         } catch (WorkflowException $e) {
@@ -259,7 +259,7 @@ class AdminPengabdianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pengabdian.index')
+            return redirect()->route('admin.pengabdian.index')
                 ->with('success', 'Pengabdian diminta revisi pra-final.');
 
         } catch (WorkflowException $e) {
@@ -305,7 +305,7 @@ class AdminPengabdianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pengabdian.index')
+            return redirect()->route('admin.pengabdian.index')
                 ->with('success', 'Pengabdian berhasil diselesaikan.');
 
         } catch (WorkflowException $e) {

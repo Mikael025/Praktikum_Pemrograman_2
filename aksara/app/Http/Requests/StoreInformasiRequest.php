@@ -16,6 +16,7 @@ class StoreInformasiRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:informasi,slug'],
+            'image' => ['required', 'image', 'max:2048'],
             'content' => ['required', 'string'],
             'category' => ['required', 'in:penelitian,pengabdian,umum'],
             'visibility' => ['required', 'in:admin,dosen,semua'],

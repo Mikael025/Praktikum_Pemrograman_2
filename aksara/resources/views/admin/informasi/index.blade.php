@@ -15,10 +15,17 @@
 
         <div class="bg-white shadow rounded-lg divide-y divide-gray-200">
             @forelse($informasi as $info)
-                <div class="p-4 flex items-center justify-between">
-                    <div>
-                        <div class="font-medium text-gray-900">{{ $info->title }}</div>
-                        <div class="text-sm text-gray-500">{{ optional($info->published_at)->format('d M Y') }} • {{ ucfirst($info->category) }} • {{ ucfirst($info->visibility) }}</div>
+                <div class="p-4 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        @if($info->image_path)
+                            <img src="{{ asset('storage/'.$info->image_path) }}" alt="{{ $info->title }}" class="h-16 w-24 object-cover rounded">
+                        @else
+                            <div class="h-16 w-24 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">No image</div>
+                        @endif
+                        <div>
+                            <div class="font-medium text-gray-900">{{ $info->title }}</div>
+                            <div class="text-sm text-gray-500">{{ optional($info->published_at)->format('d M Y') }} • {{ ucfirst($info->category) }} • {{ ucfirst($info->visibility) }}</div>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <a href="{{ route('admin.informasi.show', $info->slug) }}" class="text-blue-600 hover:underline">Lihat</a>

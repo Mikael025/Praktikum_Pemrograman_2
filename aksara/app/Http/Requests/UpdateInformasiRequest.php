@@ -14,7 +14,8 @@ class UpdateInformasiRequest extends FormRequest
 
     public function rules(): array
     {
-        $slug = $this->route('informasi');
+        // route parameter is {slug}; fallback to {informasi} if route name differs
+        $slug = $this->route('slug') ?? $this->route('informasi');
         return [
             'title' => ['required', 'string', 'max:255'],
             'slug' => [
@@ -23,6 +24,7 @@ class UpdateInformasiRequest extends FormRequest
                 'max:255',
                 Rule::unique('informasi', 'slug')->ignore($slug, 'slug'),
             ],
+            'image' => ['nullable', 'image', 'max:2048'],
             'content' => ['required', 'string'],
             'category' => ['required', 'in:penelitian,pengabdian,umum'],
             'visibility' => ['required', 'in:admin,dosen,semua'],

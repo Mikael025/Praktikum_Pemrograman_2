@@ -9,7 +9,7 @@ Route::get('/', function () {
 
 // Redirect dashboard berdasarkan role
 Route::get('/dashboard', function () {
-    $user = Auth::user();
+    $user = Illuminate\Support\Facades\Auth::user();
     if ($user->role === 'admin') {
         return redirect()->route('dashboard.admin');
     } else {

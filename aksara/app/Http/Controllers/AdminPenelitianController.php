@@ -52,7 +52,7 @@ class AdminPenelitianController extends Controller
         
         $penelitian = $query->orderBy('created_at', 'desc')->paginate(15);
         
-        return view('penelitian.index', compact('penelitian', 'penelitianStats'));
+        return view('admin.penelitian.index', compact('penelitian', 'penelitianStats'));
     }
     
     public function show(Penelitian $penelitian)
@@ -73,7 +73,7 @@ class AdminPenelitianController extends Controller
         // Catatan verifikasi wajib diisi (sudah divalidasi di request)
         $penelitian->update($request->validated());
         
-        return redirect()->route('penelitian.index')
+        return redirect()->route('admin.penelitian.index')
             ->with('success', 'Penelitian berhasil diperbarui.');
     }
     
@@ -81,7 +81,7 @@ class AdminPenelitianController extends Controller
     {
         $penelitian->delete();
         
-        return redirect()->route('penelitian.index')
+        return redirect()->route('admin.penelitian.index')
             ->with('success', 'Penelitian berhasil dihapus.');
     }
     
@@ -119,7 +119,7 @@ class AdminPenelitianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('penelitian.index')
+            return redirect()->route('admin.penelitian.index')
                 ->with('success', 'Penelitian berhasil ditolak.');
 
         } catch (WorkflowException $e) {
@@ -165,7 +165,7 @@ class AdminPenelitianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('penelitian.index')
+            return redirect()->route('admin.penelitian.index')
                 ->with('success', 'Penelitian lolos dengan revisi.');
 
         } catch (WorkflowException $e) {
@@ -211,7 +211,7 @@ class AdminPenelitianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('penelitian.index')
+            return redirect()->route('admin.penelitian.index')
                 ->with('success', 'Penelitian berhasil disetujui.');
 
         } catch (WorkflowException $e) {
@@ -257,7 +257,7 @@ class AdminPenelitianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('penelitian.index')
+            return redirect()->route('admin.penelitian.index')
                 ->with('success', 'Penelitian diminta revisi pra-final.');
 
         } catch (WorkflowException $e) {
@@ -303,7 +303,7 @@ class AdminPenelitianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('penelitian.index')
+            return redirect()->route('admin.penelitian.index')
                 ->with('success', 'Penelitian berhasil diselesaikan.');
 
         } catch (WorkflowException $e) {

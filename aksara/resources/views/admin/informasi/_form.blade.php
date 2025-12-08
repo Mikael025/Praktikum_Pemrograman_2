@@ -11,6 +11,17 @@
         @error('slug')<div class="text-sm text-red-600">{{ $message }}</div>@enderror
     </div>
     <div>
+        <label class="block text-sm font-medium text-gray-700">Gambar</label>
+        <input type="file" name="image" accept="image/*" class="mt-1 block w-full rounded-md border-gray-300" @if(!$informasi->exists) required @endif>
+        <p class="text-xs text-gray-500 mt-1">Unggah gambar representatif (maks 2MB).</p>
+        @if($informasi->image_path)
+            <div class="mt-2">
+                <img src="{{ asset('storage/'.$informasi->image_path) }}" alt="Gambar" class="h-24 w-36 object-cover rounded">
+            </div>
+        @endif
+        @error('image')<div class="text-sm text-red-600">{{ $message }}</div>@enderror
+    </div>
+    <div>
         <label class="block text-sm font-medium text-gray-700">Kategori</label>
         <select name="category" class="mt-1 block w-full rounded-md border-gray-300">
             @php($cats = ['penelitian' => 'Penelitian', 'pengabdian' => 'Pengabdian', 'umum' => 'Umum'])
