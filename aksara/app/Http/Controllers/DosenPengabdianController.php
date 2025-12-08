@@ -23,6 +23,7 @@ class DosenPengabdianController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        $year = $request->get('year');
         $query = $user->pengabdian();
         
         // Filter tahun
@@ -46,8 +47,16 @@ class DosenPengabdianController extends Controller
             });
         }
         
+        // Statistik Pengabdian dengan status baru
+        $pengabdianStats = [
+            'diusulkan' => (clone $query)->where('status', 'diusulkan')->count(),
+            'tidak_lolos' => (clone $query)->where('status', 'tidak_lolos')->count(),
+            'lolos' => (clone $query)->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+            'selesai' => (clone $query)->where('status', 'selesai')->count(),
+        ];
+
         $pengabdian = $query->latest()->paginate(15);
-        return view('dosen.pengabdian.index', compact('pengabdian'));
+        return view('dosen.pengabdian.index', compact('pengabdian', 'pengabdianStats'));
     }
 
     /**

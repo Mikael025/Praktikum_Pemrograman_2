@@ -28,6 +28,10 @@ class DosenDashboardController extends Controller
             $pengabdianQuery->where('tahun', $year);
         }
         
+        // ACTION REQUIRED DATA
+        $totalPenelitian = $user->penelitian()->count();
+        $totalPengabdian = $user->pengabdian()->count();
+        
         // Statistik Penelitian dengan status baru
         $penelitianStats = [
             'diusulkan' => (clone $penelitianQuery)->where('status', 'diusulkan')->count(),
@@ -35,7 +39,8 @@ class DosenDashboardController extends Controller
             'lolos' => (clone $penelitianQuery)->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
             'selesai' => (clone $penelitianQuery)->where('status', 'selesai')->count(),
         ];
-        
+
+
         // Statistik Pengabdian dengan status baru
         $pengabdianStats = [
             'diusulkan' => (clone $pengabdianQuery)->where('status', 'diusulkan')->count(),
@@ -43,11 +48,21 @@ class DosenDashboardController extends Controller
             'lolos' => (clone $pengabdianQuery)->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
             'selesai' => (clone $pengabdianQuery)->where('status', 'selesai')->count(),
         ];
-        
-        // ACTION REQUIRED DATA
-        $totalPenelitian = $user->penelitian()->count();
-        $totalPengabdian = $user->pengabdian()->count();
-        
+
+        // ENHANCED STATS
+        $enhancedStats = [
+            'total_kegiatan' => $totalPenelitian + $totalPengabdian,
+            'success_rate' => $totalPenelitian + $totalPengabdian > 0 
+                ? round((($penelitianStats['lolos'] + $penelitianStats['selesai'] + $pengabdianStats['lolos'] + $pengabdianStats['selesai']) / ($totalPenelitian + $totalPengabdian)) * 100, 1)
+                : 0,
+            'completion_rate' => $totalPenelitian + $totalPengabdian > 0
+                ? round((($penelitianStats['selesai'] + $pengabdianStats['selesai']) / ($totalPenelitian + $totalPengabdian)) * 100, 1)
+                : 0,
+            'total_penelitian' => $totalPenelitian,
+            'total_pengabdian' => $totalPengabdian,
+        ];
+
+
         $actionRequired = [
             // Items that need revision
             'needs_revision' => $user->penelitian()
@@ -76,19 +91,6 @@ class DosenDashboardController extends Controller
                 ->count(),
         ];
         
-        // ENHANCED STATS
-        $enhancedStats = [
-            'total_kegiatan' => $totalPenelitian + $totalPengabdian,
-            'success_rate' => $totalPenelitian + $totalPengabdian > 0 
-                ? round((($penelitianStats['lolos'] + $penelitianStats['selesai'] + $pengabdianStats['lolos'] + $pengabdianStats['selesai']) / ($totalPenelitian + $totalPengabdian)) * 100, 1)
-                : 0,
-            'completion_rate' => $totalPenelitian + $totalPengabdian > 0
-                ? round((($penelitianStats['selesai'] + $pengabdianStats['selesai']) / ($totalPenelitian + $totalPengabdian)) * 100, 1)
-                : 0,
-            'total_penelitian' => $totalPenelitian,
-            'total_pengabdian' => $totalPengabdian,
-        ];
-        
         // RECENT ACTIVITIES (last 10 updates)
         $recentActivities = collect()
             ->merge($user->penelitian()->latest('updated_at')->take(5)->get()->map(function($item) {
@@ -113,12 +115,12 @@ class DosenDashboardController extends Controller
             ->take(10);
         
         return view('dashboard-dosen', compact(
-            'penelitianStats', 
-            'pengabdianStats', 
             'year', 
             'actionRequired', 
+            'recentActivities',
             'enhancedStats',
-            'recentActivities'
+            'penelitianStats',
+            'pengabdianStats'
         ));
     }
 }

@@ -3,7 +3,7 @@
 
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900">Penelitian</h1>
+            <h1 class="text-xl font-bold text-gray-900">Statistik Penelitian</h1>
         </div>
 
         <div class="bg-white rounded-lg shadow p-4">
@@ -15,6 +15,16 @@
                 {{ session('success') }}
             </div>
         @endif
+
+        <!-- Statistik Penelitian -->
+        <section class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <x-stat-card title="Jumlah Penelitian Diusulkan" :value="$penelitianStats['diusulkan']" color="blue" />
+                <x-stat-card title="Jumlah Penelitian Tidak Lolos" :value="$penelitianStats['tidak_lolos']" color="red" />
+                <x-stat-card title="Jumlah Penelitian Lolos" :value="$penelitianStats['lolos']" color="green" />
+                <x-stat-card title="Jumlah Penelitian Selesai" :value="$penelitianStats['selesai']" color="emerald" />
+            </div>
+        </section>
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">

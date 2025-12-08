@@ -18,7 +18,8 @@ class AdminPenelitianController extends Controller
     public function index(Request $request)
     {
         $query = Penelitian::with('user');
-        
+        $year = $request->get('year');
+
         // Filter tahun
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);
@@ -40,10 +41,18 @@ class AdminPenelitianController extends Controller
                   });
             });
         }
+
+        // Statistik Penelitian dengan status baru
+        $penelitianStats = [
+            'diusulkan' => (clone $query)->where('status', 'diusulkan')->count(),
+            'tidak_lolos' => (clone $query)->where('status', 'tidak_lolos')->count(),
+            'lolos' => (clone $query)->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+            'selesai' => (clone $query)->where('status', 'selesai')->count(),
+        ];
         
         $penelitian = $query->orderBy('created_at', 'desc')->paginate(15);
         
-        return view('penelitian.index', compact('penelitian'));
+        return view('penelitian.index', compact('penelitian', 'penelitianStats'));
     }
     
     public function show(Penelitian $penelitian)
@@ -332,8 +341,8 @@ class AdminPenelitianController extends Controller
 
             // Log for audit trail
             Log::info('Catatan verifikasi updated', [
-                'admin_id' => auth()->id(),
-                'admin_name' => auth()->user()->name,
+                'admin_id' => Auth::id(),
+                'admin_name' => Auth::user()->name,
                 'penelitian_id' => $penelitian->id,
                 'penelitian_judul' => $penelitian->judul,
                 'status' => $penelitian->status,

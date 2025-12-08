@@ -1,18 +1,27 @@
 <x-layouts.dosen>
     <div class="space-y-6">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900">Penelitian Saya</h1>
-            <a href="{{ route('dosen.penelitian.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
-                Tambah Penelitian Baru
-            </a>
-        </div>
-
+        <h1 class="text-xl font-bold text-gray-900">Statistik Penelitian Saya</h1>
         <div class="bg-white rounded-lg shadow p-4">
             <x-filter-bar :years="range((int)date('Y'), (int)date('Y')-5)" :show-status="true" />
         </div>
+        <!-- Statistik Penelitian -->
+        <section class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <x-stat-card title="Jumlah Penelitian Diusulkan" :value="$penelitianStats['diusulkan']" color="blue" />
+                <x-stat-card title="Jumlah Penelitian Tidak Lolos" :value="$penelitianStats['tidak_lolos']" color="red" />
+                <x-stat-card title="Jumlah Penelitian Lolos" :value="$penelitianStats['lolos']" color="green" />
+                <x-stat-card title="Jumlah Penelitian Selesai" :value="$penelitianStats['selesai']" color="emerald" />
+            </div>
+        </section>
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
+                <div class="flex items-center justify-between py-4 pl-4">
+                    <a href="{{ route('dosen.penelitian.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
+                        Tambah Penelitian Baru
+                    </a>
+                </div>
+
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>

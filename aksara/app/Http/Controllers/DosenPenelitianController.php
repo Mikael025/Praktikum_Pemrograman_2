@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
 class DosenPenelitianController extends Controller
 {
     /**
@@ -23,7 +24,11 @@ class DosenPenelitianController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        $year = $request->get('year');
         $query = $user->penelitian();
+        if ($year) {
+            $query->where('tahun', $year);
+        }
         
         // Filter tahun
         if ($request->filled('year')) {
@@ -44,9 +49,18 @@ class DosenPenelitianController extends Controller
                   ->orWhere('sumber_dana', 'like', "%{$search}%");
             });
         }
-        
+
+        // Statistik Penelitian dengan status baru
+        $penelitianStats = [
+            'diusulkan' => (clone $query)->where('status', 'diusulkan')->count(),
+            'tidak_lolos' => (clone $query)->where('status', 'tidak_lolos')->count(),
+            'lolos' => (clone $query)->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+            'selesai' => (clone $query)->where('status', 'selesai')->count(),
+        ];
+
         $penelitian = $query->latest()->paginate(15);
-        return view('dosen.penelitian.index', compact('penelitian'));
+        return view('dosen.penelitian.index', compact('penelitian', 'penelitianStats'));
+
     }
 
     /**

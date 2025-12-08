@@ -18,6 +18,8 @@ class AdminPengabdianController extends Controller
     public function index(Request $request)
     {
         $query = Pengabdian::with('user');
+        $year = $request->get('year');
+
         
         // Filter tahun
         if ($request->filled('year')) {
@@ -42,9 +44,17 @@ class AdminPengabdianController extends Controller
             });
         }
         
+        // Statistik Pengabdian dengan status baru
+        $pengabdianStats = [
+            'diusulkan' => (clone $query)->where('status', 'diusulkan')->count(),
+            'tidak_lolos' => (clone $query)->where('status', 'tidak_lolos')->count(),
+            'lolos' => (clone $query)->whereIn('status', ['lolos_perlu_revisi', 'lolos', 'revisi_pra_final'])->count(),
+            'selesai' => (clone $query)->where('status', 'selesai')->count(),
+        ];
+
         $pengabdian = $query->orderBy('created_at', 'desc')->paginate(15);
         
-        return view('pengabdian.index', compact('pengabdian'));
+        return view('pengabdian.index', compact('pengabdian', 'pengabdianStats'));
     }
     
     public function show(Pengabdian $pengabdian)
@@ -333,8 +343,8 @@ class AdminPengabdianController extends Controller
 
             // Log for audit trail
             Log::info('Catatan verifikasi updated', [
-                'admin_id' => auth()->id(),
-                'admin_name' => auth()->user()->name,
+                'admin_id' => Auth::id(),
+                'admin_name' => Auth::user()->name,
                 'pengabdian_id' => $pengabdian->id,
                 'pengabdian_judul' => $pengabdian->judul,
                 'status' => $pengabdian->status,
