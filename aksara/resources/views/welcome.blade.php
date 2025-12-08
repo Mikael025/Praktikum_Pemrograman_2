@@ -23,6 +23,9 @@
                 --primary: #4338ca; /* Indigo 700 */
                 --secondary: #0f172a; /* Slate 900 */
                 --accent: #f59e0b; /* Amber 500 */
+                /* Blue theme for hero subtitle gradient */
+                --blue-dark: #0b3b75; /* navy/dark blue */
+                --blue-light: #60a5fa; /* light blue (Tailwind blue-400) */
             }
 
             /* Glassmorphism Classes */
@@ -126,9 +129,8 @@
                             </div>
                             
                             <h1 class="text-5xl lg:text-7xl font-extrabold leading-tight mb-6 tracking-tight">
-                                Solusi Cerdas <br> untuk 
-                                {{-- Gradient Teks Diperbaiki --}}
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-500 drop-shadow-sm">Masa Depan</span>
+                                Solusi Cerdas<br>
+                                untuk <span style="background: linear-gradient(90deg, var(--blue-dark), var(--blue-light)); -webkit-background-clip: text; background-clip: text; color: transparent;" class="font-extrabold">"Masa Depan"</span>
                             </h1>
                             
                             {{-- Warna paragraf diperbaiki agar menyatu dengan background --}}
@@ -286,51 +288,7 @@
                 </div>
             </section>
 
-            {{-- ======================== TESTIMONIALS ======================== --}}
-            <section class="py-24 bg-white relative overflow-hidden">
-                <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50"></div>
-                
-                <div class="max-w-7xl mx-auto px-4 relative z-10">
-                    <div class="flex flex-col md:flex-row justify-between items-end mb-12 fade-in-up">
-                        <div class="max-w-xl">
-                            <h2 class="text-indigo-600 font-bold tracking-wide uppercase mb-2">Suara Komunitas</h2>
-                            <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900">Dampak Nyata di Lapangan</h3>
-                        </div>
-                        <div class="flex gap-2 mt-4 md:mt-0">
-                            <button class="p-2 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                            <button class="p-2 rounded-full bg-slate-900 text-white hover:bg-slate-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {{-- Testimonial 1 --}}
-                        <div class="p-8 bg-slate-50 rounded-2xl border border-slate-100 relative fade-in-up">
-                            <svg class="absolute top-6 right-6 w-12 h-12 text-indigo-100" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.0547 15.5947 14.4772 17.5401 14.4772L19.5852 14.4772L19.5852 9.54443L17.5401 9.54443C15.6796 9.54443 14.1706 8.03541 14.1706 6.17495L14.1706 3L22 3L22 13.0449C22 17.4389 18.4116 21 14.017 21ZM5.01657 21L5.01657 18C5.01657 16.0547 6.59426 14.4772 8.53966 14.4772L10.5847 14.4772L10.5847 9.54443L8.53966 9.54443C6.67915 9.54443 5.17013 8.03541 5.17013 6.17495L5.17013 3L13 3L13 13.0449C13 17.4389 9.41113 21 5.01657 21Z"/></svg>
-                            <p class="text-slate-700 italic text-lg mb-6 relative z-10">"Kerjasama dengan tim peneliti AKSA-RA memberikan wawasan baru bagi pengembangan produk desa kami. Penjualan kami meningkat 300% berkat strategi branding yang mereka sarankan."</p>
-                            <div class="flex items-center gap-4">
-                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="User" class="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-500 ring-offset-2">
-                                <div>
-                                    <h4 class="font-bold text-slate-900">Budi Santoso</h4>
-                                    <p class="text-sm text-slate-500">Ketua Koperasi Tani Makmur</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Testimonial 2 --}}
-                        <div class="p-8 bg-slate-50 rounded-2xl border border-slate-100 relative fade-in-up delay-100">
-                             <svg class="absolute top-6 right-6 w-12 h-12 text-indigo-100" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.0547 15.5947 14.4772 17.5401 14.4772L19.5852 14.4772L19.5852 9.54443L17.5401 9.54443C15.6796 9.54443 14.1706 8.03541 14.1706 6.17495L14.1706 3L22 3L22 13.0449C22 17.4389 18.4116 21 14.017 21ZM5.01657 21L5.01657 18C5.01657 16.0547 6.59426 14.4772 8.53966 14.4772L10.5847 14.4772L10.5847 9.54443L8.53966 9.54443C6.67915 9.54443 5.17013 8.03541 5.17013 6.17495L5.17013 3L13 3L13 13.0449C13 17.4389 9.41113 21 5.01657 21Z"/></svg>
-                            <p class="text-slate-700 italic text-lg mb-6 relative z-10">"Platform yang inovatif dan sangat responsif terhadap kebutuhan mitra. Program pengabdian masyarakat yang dijalankan benar-benar tepat sasaran dan berkelanjutan."</p>
-                            <div class="flex items-center gap-4">
-                                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="User" class="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-500 ring-offset-2">
-                                <div>
-                                    <h4 class="font-bold text-slate-900">Dr. Sarah Wijaya</h4>
-                                    <p class="text-sm text-slate-500">Direktur LSM Lingkungan</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            
 
             {{-- ======================== CTA SECTION ======================== --}}
             <section class="py-20 bg-slate-900 text-white relative overflow-hidden">
