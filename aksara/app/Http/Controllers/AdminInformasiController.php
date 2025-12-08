@@ -38,6 +38,13 @@ class AdminInformasiController extends Controller
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('informasi', 'public');
         }
+        // Set default values if not provided
+        if (empty($data['visibility'])) {
+            $data['visibility'] = 'semua'; // visible to all roles
+        }
+        if (empty($data['published_at'])) {
+            $data['published_at'] = now(); // publish immediately
+        }
         Informasi::create($data);
         return redirect()->route('admin.informasi.index')->with('status', 'Informasi created');
     }
@@ -66,6 +73,13 @@ class AdminInformasiController extends Controller
                 Storage::disk('public')->delete($informasi->image_path);
             }
             $data['image_path'] = $request->file('image')->store('informasi', 'public');
+        }
+        // Ensure visibility and published_at are set
+        if (empty($data['visibility'])) {
+            $data['visibility'] = $informasi->visibility ?: 'semua';
+        }
+        if (empty($data['published_at'])) {
+            $data['published_at'] = $informasi->published_at ?: now();
         }
         $informasi->update($data);
         return redirect()->route('admin.informasi.index')->with('status', 'Informasi updated');

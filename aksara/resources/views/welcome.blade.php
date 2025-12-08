@@ -82,7 +82,7 @@
                     <nav class="hidden md:flex space-x-8">
                         <a href="{{ route('public.home') }}" class="hover:text-amber-400 font-medium transition-colors">Beranda</a>
                         <a href="{{ route('public.visimisi') }}" class="hover:text-amber-400 font-medium transition-colors">Visi & Misi</a>
-                        <a href="{{ route('public.news.umum') }}" class="hover:text-amber-400 font-medium transition-colors">Informasi/Berita</a>
+                        <a href="{{ route('public.news', ['category' => 'semua']) }}" class="hover:text-amber-400 font-medium transition-colors">Informasi/Berita</a>
                         <a href="{{ route('public.downloads') }}" class="hover:text-amber-400 font-medium transition-colors">Unduh</a>
                     </nav>
 
@@ -105,7 +105,7 @@
                 </button>
                 <a href="{{ route('public.home') }}" class="text-2xl font-bold hover:text-amber-400">Beranda</a>
                 <a href="{{ route('public.visimisi') }}" class="text-2xl font-bold hover:text-amber-400">Visi & Misi</a>
-                <a href="{{ route('public.news.umum') }}" class="text-2xl font-bold hover:text-amber-400">Berita</a>
+                <a href="{{ route('public.news', ['category' => 'semua']) }}" class="text-2xl font-bold hover:text-amber-400">Berita</a>
                 <a href="{{ route('login') }}" class="px-8 py-3 bg-indigo-600 rounded-full font-bold shadow-lg shadow-indigo-500/50">Masuk Portal</a>
             </div>
         </header>
@@ -223,7 +223,7 @@
                                 <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ strip_tags($berita->content) }}</p>
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs text-slate-500">{{ $berita->published_at->format('d M Y') }}</span>
-                                    <a href="{{ route('public.news.' . $berita->category) }}" class="inline-flex items-center text-indigo-600 font-semibold text-sm hover:translate-x-1 transition-transform">
+                                    <a href="{{ route('public.news.detail', ['category' => $berita->category, 'slug' => $berita->slug]) }}" class="inline-flex items-center text-indigo-600 font-semibold text-sm hover:translate-x-1 transition-transform">
                                         Baca Selengkapnya <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                     </a>
                                 </div>

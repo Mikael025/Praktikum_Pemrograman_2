@@ -100,6 +100,9 @@
                 <div class="max-w-4xl mx-auto px-4">
                     {{-- Category Filter --}}
                     <div class="mb-12 flex flex-wrap gap-3">
+                        <a href="{{ route('public.news', ['category' => 'semua']) }}" class="px-4 py-2 rounded-full font-medium transition-colors {{ $category === 'semua' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                            Semua
+                        </a>
                         <a href="{{ route('public.news', ['category' => 'umum']) }}" class="px-4 py-2 rounded-full font-medium transition-colors {{ $category === 'umum' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
                             Umum
                         </a>
@@ -143,6 +146,12 @@
                                         {{ strip_tags($berita->content) }}
                                     </p>
                                     <a href="{{ route('public.news', ['category' => $berita->category]) }}#{{ $berita->slug }}" class="inline-flex items-center text-indigo-600 font-semibold hover:translate-x-1 transition-transform">
+                                        Baca Selengkapnya
+                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                        </svg>
+                                    </a>
+                                    <a href="{{ route('public.news.detail', ['category' => $berita->category, 'slug' => $berita->slug]) }}" class="inline-flex items-center text-indigo-600 font-semibold hover:translate-x-1 transition-transform">
                                         Baca Selengkapnya
                                         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>

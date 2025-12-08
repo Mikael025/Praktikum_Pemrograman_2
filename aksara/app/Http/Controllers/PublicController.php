@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Informasi;
@@ -23,29 +22,56 @@ class PublicController extends Controller
     }
 
     /**
-     * Show news by category (umum, penelitian, pengabdian)
+     * Show news by category (umum, penelitian, pengabdian, semua)
      */
     public function newsByCategory(string $category): View
     {
-        $validCategories = ['umum', 'penelitian', 'pengabdian'];
+        $validCategories = ['semua', 'umum', 'penelitian', 'pengabdian'];
         
         if (!in_array($category, $validCategories)) {
             abort(404);
         }
 
-        $informasi = Informasi::published()
-            ->visibleTo('guest')
-            ->where('category', $category)
-            ->orderByDesc('published_at')
+        $query = Informasi::published()
+            ->visibleTo('guest');
+
+        // Only filter by category if not 'semua'
+        if ($category !== 'semua') {
+            $query->where('category', $category);
+        }
+
+        $informasi = $query->orderByDesc('published_at')
             ->paginate(10);
 
         $categoryLabel = match($category) {
             'penelitian' => 'Penelitian',
             'pengabdian' => 'Pengabdian Masyarakat',
+            'semua' => 'Semua Berita',
             default => 'Umum'
         };
 
         return view('public.news-category', compact('informasi', 'category', 'categoryLabel'));
     }
+
+    /**
+     * Show detail berita/informasi for public
+     */
+    public function newsDetail(string $category, string $slug): View
+    {
+        $validCategories = ['umum', 'penelitian', 'pengabdian'];
+        if (!in_array($category, $validCategories)) {
+            abort(404);
+        }
+
+
+        $berita = Informasi::published()
+            ->visibleTo('guest')
+            ->where('category', $category)
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return view('public.news-detail', compact('berita'));
+    }
 }
+
 

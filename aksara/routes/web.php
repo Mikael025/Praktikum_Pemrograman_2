@@ -109,7 +109,11 @@ require __DIR__.'/auth.php';
 
 // Public informational pages (no auth)
 Route::view('/visi-misi', 'public.visi-misi')->name('public.visimisi');
+Route::get('/informasi-berita', function () {
+    return redirect()->route('public.news', ['category' => 'semua']);
+})->name('public.news.index');
 Route::get('/informasi-berita/{category}', [App\Http\Controllers\PublicController::class, 'newsByCategory'])->name('public.news');
+Route::get('/informasi-berita/{category}/{slug}', [App\Http\Controllers\PublicController::class, 'newsDetail'])->name('public.news.detail');
 Route::view('/unduh', 'public.downloads')->name('public.downloads');
 
 // Backward compatibility routes

@@ -36,14 +36,14 @@
         <select name="visibility" class="mt-1 block w-full rounded-md border-gray-300">
             @php($vis = ['semua' => 'Semua', 'admin' => 'Admin', 'dosen' => 'Dosen'])
             @foreach($vis as $val => $label)
-                <option value="{{ $val }}" {{ old('visibility', $informasi->visibility) === $val ? 'selected' : '' }}>{{ $label }}</option>
+                <option value="{{ $val }}" {{ old('visibility', $informasi->visibility ?? 'semua') === $val ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>
         @error('visibility')<div class="text-sm text-red-600">{{ $message }}</div>@enderror
     </div>
     <div>
         <label class="block text-sm font-medium text-gray-700">Tanggal Publikasi</label>
-        <input type="datetime-local" name="published_at" value="{{ old('published_at', optional($informasi->published_at)->format('Y-m-d\TH:i')) }}" class="mt-1 block w-full rounded-md border-gray-300">
+        <input type="datetime-local" name="published_at" value="{{ old('published_at', optional($informasi->published_at ?? now())->format('Y-m-d\TH:i')) }}" class="mt-1 block w-full rounded-md border-gray-300">
         @error('published_at')<div class="text-sm text-red-600">{{ $message }}</div>@enderror
     </div>
     <div>
