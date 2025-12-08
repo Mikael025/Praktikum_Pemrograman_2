@@ -82,22 +82,7 @@
                     <nav class="hidden md:flex space-x-8">
                         <a href="{{ route('public.home') }}" class="hover:text-amber-400 font-medium transition-colors">Beranda</a>
                         <a href="{{ route('public.visimisi') }}" class="hover:text-amber-400 font-medium transition-colors">Visi & Misi</a>
-                        
-                        <div class="relative group">
-                            <button class="flex items-center hover:text-amber-400 font-medium transition-colors">
-                                Informasi
-                                <svg class="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </button>
-                            {{-- Dropdown Menu --}}
-                            <div class="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <div class="bg-white rounded-xl shadow-xl border border-slate-100 p-2 w-48 overflow-hidden text-slate-600">
-                                    <a href="{{ route('public.news.umum') }}" class="block px-4 py-2 text-sm hover:bg-indigo-50 hover:text-indigo-700 rounded-lg">Berita Umum</a>
-                                    <a href="{{ route('public.news.penelitian') }}" class="block px-4 py-2 text-sm hover:bg-indigo-50 hover:text-indigo-700 rounded-lg">Penelitian</a>
-                                    <a href="{{ route('public.news.pengabdian') }}" class="block px-4 py-2 text-sm hover:bg-indigo-50 hover:text-indigo-700 rounded-lg">Pengabdian</a>
-                                </div>
-                            </div>
-                        </div>
-
+                        <a href="{{ route('public.news.umum') }}" class="hover:text-amber-400 font-medium transition-colors">Informasi/Berita</a>
                         <a href="{{ route('public.downloads') }}" class="hover:text-amber-400 font-medium transition-colors">Unduh</a>
                     </nav>
 
@@ -218,7 +203,34 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {{-- Card 1 --}}
+                        @forelse($featuredBerita as $index => $berita)
+                        <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 fade-in-up delay-{{ $loop->iteration }}00">
+                            <div class="relative h-56 overflow-hidden">
+                                @if($berita->image_path)
+                                    <img src="{{ asset('storage/' . $berita->image_path) }}" alt="{{ $berita->title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                                        <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                                <span class="absolute top-4 left-4 bg-{{ $berita->category === 'penelitian' ? 'amber' : ($berita->category === 'pengabdian' ? 'teal' : 'indigo') }}-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">{{ ucfirst($berita->category) }}</span>
+                            </div>
+                            <div class="p-6">
+                                <h4 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2">{{ $berita->title }}</h4>
+                                <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ strip_tags($berita->content) }}</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-500">{{ $berita->published_at->format('d M Y') }}</span>
+                                    <a href="{{ route('public.news.' . $berita->category) }}" class="inline-flex items-center text-indigo-600 font-semibold text-sm hover:translate-x-1 transition-transform">
+                                        Baca Selengkapnya <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        {{-- Fallback cards jika tidak ada berita --}}
                         <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 fade-in-up delay-100">
                             <div class="relative h-56 overflow-hidden">
                                 <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Data Science" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
@@ -234,7 +246,6 @@
                             </div>
                         </div>
 
-                        {{-- Card 2 --}}
                         <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 fade-in-up delay-200">
                             <div class="relative h-56 overflow-hidden">
                                 <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Lab Research" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
@@ -250,7 +261,6 @@
                             </div>
                         </div>
 
-                        {{-- Card 3 --}}
                         <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 fade-in-up delay-300">
                             <div class="relative h-56 overflow-hidden">
                                 <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Economy" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
@@ -265,10 +275,11 @@
                                 </a>
                             </div>
                         </div>
+                        @endforelse
                     </div>
 
                     <div class="mt-12 text-center">
-                        <a href="#" class="inline-block px-6 py-3 border-2 border-slate-200 text-slate-600 font-bold rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-colors">
+                        <a href="{{ route('public.downloads') }}" class="inline-block px-6 py-3 border-2 border-slate-200 text-slate-600 font-bold rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-colors">
                             Lihat Arsip Penelitian
                         </a>
                     </div>

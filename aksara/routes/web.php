@@ -3,9 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('public.home');
+Route::get('/', [App\Http\Controllers\PublicController::class, 'home'])->name('public.home');
 
 // Redirect dashboard berdasarkan role
 Route::get('/dashboard', function () {
@@ -111,7 +109,10 @@ require __DIR__.'/auth.php';
 
 // Public informational pages (no auth)
 Route::view('/visi-misi', 'public.visi-misi')->name('public.visimisi');
-Route::view('/informasi-berita/umum', 'public.news-umum')->name('public.news.umum');
-Route::view('/informasi-berita/penelitian', 'public.news-penelitian')->name('public.news.penelitian');
-Route::view('/informasi-berita/pengabdian', 'public.news-pengabdian')->name('public.news.pengabdian');
+Route::get('/informasi-berita/{category}', [App\Http\Controllers\PublicController::class, 'newsByCategory'])->name('public.news');
 Route::view('/unduh', 'public.downloads')->name('public.downloads');
+
+// Backward compatibility routes
+Route::redirect('/informasi-berita/umum', '/informasi-berita/umum', 301)->name('public.news.umum');
+Route::redirect('/informasi-berita/penelitian', '/informasi-berita/penelitian', 301)->name('public.news.penelitian');
+Route::redirect('/informasi-berita/pengabdian', '/informasi-berita/pengabdian', 301)->name('public.news.pengabdian');
