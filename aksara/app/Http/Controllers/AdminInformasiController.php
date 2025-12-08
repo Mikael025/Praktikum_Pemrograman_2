@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class AdminInformasiController extends Controller
 {
@@ -34,6 +35,9 @@ class AdminInformasiController extends Controller
     {
         $data = $request->validated();
         $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('informasi', 'public');
+        }
         Informasi::create($data);
         return redirect()->route('admin.informasi.index')->with('status', 'Informasi created');
     }
@@ -56,6 +60,12 @@ class AdminInformasiController extends Controller
         $data = $request->validated();
         if (empty($data['slug'])) {
             $data['slug'] = $informasi->slug; // keep existing if not provided
+        }
+        if ($request->hasFile('image')) {
+            if ($informasi->image_path) {
+                Storage::disk('public')->delete($informasi->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('informasi', 'public');
         }
         $informasi->update($data);
         return redirect()->route('admin.informasi.index')->with('status', 'Informasi updated');
