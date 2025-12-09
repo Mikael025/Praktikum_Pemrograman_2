@@ -1,7 +1,7 @@
 <x-guest-layout>
-    <div class="flex min-h-screen bg-white font-sans">
+    <div class="flex flex-col lg:flex-row min-h-screen bg-white font-sans overflow-hidden">
 
-        <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 relative">
+        <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 relative z-10 overflow-y-auto lg:overflow-y-visible">
 
             <div class="mb-10">
                 <div class="flex items-center gap-2 text-blue-900">
@@ -33,14 +33,14 @@
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input id="email" class="block w-full px-4 py-3 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+                    <input id="email" class="block w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
                            type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="nama@email.com" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input id="password" class="block w-full px-4 py-3 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+                    <input id="password" class="block w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
                            type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
@@ -58,7 +58,7 @@
                     @endif
                 </div>
 
-                <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-[1.01]">
+                <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold btn-theme focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-[1.01]">
                     {{ __('Sign in') }}
                 </button>
 
@@ -71,7 +71,7 @@
             </form>
         </div>
 
-        <div class="hidden lg:flex w-1/2 bg-gradient-to-br from-[#1e3a8a] via-[#2563eb] to-[#60a5fa] relative overflow-hidden items-center justify-center text-white p-12">
+        <div class="hidden lg:flex lg:w-1/2 panel-gradient relative overflow-hidden items-center justify-center text-white p-12 min-h-screen z-0">
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-400 opacity-20 blur-3xl"></div>
             <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-900 opacity-30 blur-3xl"></div>
 

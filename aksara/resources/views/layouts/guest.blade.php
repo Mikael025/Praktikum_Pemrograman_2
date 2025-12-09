@@ -15,31 +15,9 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-[#003830]">
-        <div class="flex min-h-screen">
-            <!-- Left side - Background area -->
-            <div class="hidden lg:block lg:w-2/3 bg-[#003830]"></div>
-            
-            <!-- Right side - White form area -->
-            <div class="w-full lg:w-1/3 p-8 space-y-6 bg-[#FFFFFF] rounded-l-3xl shadow-lg flex flex-col justify-center">
-                <!--Logo Png File-->
-                <div class="flex justify-center pt-26">
-                    <a href="/">
-                        <img src="{{ asset('images/logoAksara.png') }}" alt="Logo {{ config('app.name', 'Laravel') }}"  class="h-[250px] w-[300px] drop-shadow-lg">
-                    </a>
-                </div>
-                <!-- Title -->
-                <div class="text-center">
-                    <h1 class="text-5xl font-bold text-text-light pb-2">
-                        Let's sign you in
-                    </h1>
-                    <p class="text-2xl text-muted-light">Welcome to AKSARA</p>
-                </div>
-                                
-                <div class="w-full max-w-md mx-auto mt-6 px-6 py-4  overflow-hidden">
-                    {{ $slot }}
-                </div>
-            </div>
+    <body class="bg-white">
+        <div>
+            {{ $slot }}
         </div>
     </body>
 </html>
