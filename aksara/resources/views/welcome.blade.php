@@ -178,20 +178,20 @@
             <section class="max-w-6xl mx-auto px-4 -mt-16 relative z-20 fade-in-up">
                 <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-slate-100">
                     <div class="text-center">
-                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="450">0</p>
-                        <p class="text-sm font-semibold text-slate-500">Publikasi Riset</p>
+                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="{{ $stats['total_penelitian'] ?? 0 }}">0</p>
+                        <p class="text-sm font-semibold text-slate-500">Total Penelitian Aktif</p>
                     </div>
                     <div class="text-center pl-4">
-                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="86">0</p>
-                        <p class="text-sm font-semibold text-slate-500">Hak Cipta</p>
+                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="{{ $stats['penelitian_selesai'] ?? 0 }}">0</p>
+                        <p class="text-sm font-semibold text-slate-500">Total Penelitian Selesai</p>
                     </div>
                     <div class="text-center pl-4">
-                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="120">0</p>
-                        <p class="text-sm font-semibold text-slate-500">Desa Binaan</p>
+                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="{{ $stats['total_pengabdian'] ?? 0 }}">0</p>
+                        <p class="text-sm font-semibold text-slate-500">Total Pengabdian Aktif</p>
                     </div>
                     <div class="text-center pl-4">
-                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="35">0</p>
-                        <p class="text-sm font-semibold text-slate-500">Mitra Industri</p>
+                        <p class="text-4xl font-extrabold text-indigo-600 mb-1 counter" data-target="{{ $stats['pengabdian_selesai'] ?? 0 }}">0</p>
+                        <p class="text-sm font-semibold text-slate-500">Total Pengabdian Selesai</p>
                     </div>
                 </div>
             </section>

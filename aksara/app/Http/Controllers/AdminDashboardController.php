@@ -105,6 +105,8 @@ class AdminDashboardController extends Controller
                     : 0,
                 'total_penelitian' => $totalPenelitian,
                 'total_pengabdian' => $totalPengabdian,
+                'penelitian_selesai' => $penelitianStats['selesai'],
+                'pengabdian_selesai' => $pengabdianStats['selesai'],
             ];
             
             // ALERTS & WARNINGS

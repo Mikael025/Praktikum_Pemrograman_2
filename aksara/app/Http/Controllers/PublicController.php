@@ -24,7 +24,19 @@ class PublicController extends Controller
             ->limit(3)
             ->get();
 
-        // Get download statistics
+        // Get total research and community service counts
+        $penelitian = Penelitian::all();
+        $pengabdian = Pengabdian::all();
+
+        // Build stats array matching admin laporan structure
+        $stats = [
+            'total_penelitian' => $penelitian->count(),
+            'total_pengabdian' => $pengabdian->count(),
+            'penelitian_selesai' => $penelitian->where('status', 'selesai')->count(),
+            'pengabdian_selesai' => $pengabdian->where('status', 'selesai')->count(),
+        ];
+
+        // Get download statistics (for future use)
         $totalDocuments = PenelitianDocument::query()
             ->where('jenis_dokumen', 'laporan_akhir')
             ->whereHas('penelitian', fn($q) => $q->where('status', 'selesai'))
@@ -40,7 +52,7 @@ class PublicController extends Controller
             ->whereHas('pengabdian', fn($q) => $q->where('status', 'selesai'))
             ->count();
 
-        return view('welcome', compact('featuredBerita', 'totalDocuments', 'penelitianCount', 'pengabdianCount'));
+        return view('welcome', compact('featuredBerita', 'stats', 'totalDocuments', 'penelitianCount', 'pengabdianCount'));
     }
 
     /**

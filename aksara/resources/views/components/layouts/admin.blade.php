@@ -8,20 +8,25 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <style>
+            body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        </style>
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    <body class="font-sans antialiased bg-slate-50 text-slate-800">
+        <div class="min-h-screen">
             <div class="flex min-h-screen">
                 <!-- Sidebar -->
-                <aside class="hidden md:flex md:w-64 md:flex-col bg-white text-gray-800">
-                    <div class="h-16 flex items-center gap-3 px-4 border-b">
-                        <img src="{{ asset('images/logoAksara.png') }}" alt="Logo" class="h-8 w-8">
-                        <span class="text-lg font-semibold">Aksara</span>
+                <aside class="hidden md:flex md:w-64 md:flex-col bg-white border-r border-slate-200 sticky top-0 h-screen">
+                    <div class="h-16 flex items-center gap-3 px-4 border-b border-slate-200">
+                        <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">A</div>
+                        <span class="text-xl font-bold text-slate-900">KSARA</span>
                     </div>
                     <nav class="flex-1 px-2 py-4 space-y-1">
                         <x-sidebar-link href="{{ route('dashboard.admin') }}" :active="request()->routeIs('dashboard.admin')">Dashboard</x-sidebar-link>
@@ -48,20 +53,22 @@
             
                 <div class="flex-1 flex flex-col min-w-0">
                     <!-- Topbar -->
-                    <header class="h-16 flex items-center justify-between px-4 bg-white border-b border-gray-200 sticky top-0 z-10">
+                    <header class="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 sticky top-0 z-10">
                         <div class="flex items-center gap-2 md:hidden">
-                            <!-- Placeholder for mobile menu (future) -->
-                            <span class="text-gray-500">☰</span>
+                            <span class="text-slate-500">☰</span>
                         </div>
                         <div class="flex-1"></div>
-                        <div class="flex items-center gap-3">
-                            <img src="{{ asset('images/logoAksara.png') }}" alt="Logo" class="h-8 w-8">
-                            <span class="text-sm md:text-base font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</span>
+                        <div class="flex items-center gap-4">
+                            <div class="h-9 w-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">A</div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                <p class="text-xs text-slate-500">Administrator</p>
+                            </div>
                         </div>
                     </header>
 
                     <!-- Content -->
-                    <main class="p-4 md:p-6 lg:p-8">
+                    <main class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
                         {{ $slot }}
                     </main>
                     
