@@ -138,12 +138,8 @@
                             </p>
                             
                             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                                <a href="#" class="px-8 py-4 bg-white text-indigo-950 rounded-full font-bold hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 transform hover:-translate-y-1">
+                                <a href="#" class="sm:px-10 px-20 py-4 bg-white text-indigo-950 rounded-full font-bold hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 transform hover:-translate-y-1">
                                     Mulai Jelajahi
-                                </a>
-                                <a href="#" class="px-8 py-4 bg-transparent border border-white/30 text-white rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2 group backdrop-blur-sm">
-                                    <span>Tonton Video</span>
-                                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </a>
                             </div>
                         </div>

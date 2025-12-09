@@ -19,16 +19,16 @@
             body { font-family: 'Plus Jakarta Sans', sans-serif; }
         </style>
     </head>
-    <body class="font-sans antialiased bg-slate-50 text-slate-800">
+    <body class="font-sans antialiased bg-slate-50 text-slate-800" x-data="{ sidebarOpen: false }">
         <div class="min-h-screen">
             <div class="flex min-h-screen">
-                <!-- Sidebar -->
+                <!-- Sidebar Desktop -->
                 <aside class="hidden md:flex md:w-64 md:flex-col bg-white border-r border-slate-200 sticky top-0 h-screen">
                     <div class="h-16 flex items-center gap-3 px-4 border-b border-slate-200">
                         <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">A</div>
                         <span class="text-xl font-bold text-slate-900">KSARA</span>
                     </div>
-                    <nav class="flex-1 px-2 py-4 space-y-1">
+                    <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
                         <x-sidebar-link href="{{ route('dashboard.dosen') }}" :active="request()->routeIs('dashboard.dosen')">Dashboard</x-sidebar-link>
                         <x-sidebar-link href="{{ route('dosen.penelitian.index') }}" :active="request()->routeIs('dosen.penelitian.*')">Penelitian</x-sidebar-link>
                         <x-sidebar-link href="{{ route('dosen.pengabdian.index') }}" :active="request()->routeIs('dosen.pengabdian.*')">Pengabdian Masyarakat</x-sidebar-link>
@@ -50,25 +50,105 @@
                     </nav>
                 </aside>
 
+                <!-- Sidebar Mobile -->
+                <aside 
+                    x-show="sidebarOpen" 
+                    @click.outside="sidebarOpen = false"
+                    class="fixed inset-0 z-40 flex md:hidden bg-black/50"
+                >
+                    <div class="w-64 bg-white h-screen flex flex-col shadow-lg">
+                        <div class="h-16 flex items-center gap-3 px-4 border-b border-slate-200">
+                            <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">A</div>
+                            <span class="text-xl font-bold text-slate-900">KSARA</span>
+                            <button @click="sidebarOpen = false" class="ml-auto">
+                                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+                            <a href="{{ route('dashboard.dosen') }}" @click="sidebarOpen = false" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->routeIs('dashboard.dosen') ? 'bg-indigo-50 text-indigo-600' : '' }}">Dashboard</a>
+                            <a href="{{ route('dosen.penelitian.index') }}" @click="sidebarOpen = false" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->routeIs('dosen.penelitian.*') ? 'bg-indigo-50 text-indigo-600' : '' }}">Penelitian</a>
+                            <a href="{{ route('dosen.pengabdian.index') }}" @click="sidebarOpen = false" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->routeIs('dosen.pengabdian.*') ? 'bg-indigo-50 text-indigo-600' : '' }}">Pengabdian Masyarakat</a>
+                            <a href="{{ route('dosen.informasi') }}" @click="sidebarOpen = false" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->fullUrlIs(route('dosen.informasi')) ? 'bg-indigo-50 text-indigo-600' : '' }}">Informasi/Berita</a>
+                            <div x-data="{ open: {{ request()->routeIs('dosen.laporan.*') ? 'true' : 'false' }} }" class="relative">
+                                <button @click="open = !open" type="button" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->routeIs('dosen.laporan.*') ? 'bg-indigo-50 text-indigo-600' : '' }}">
+                                    Laporan & Rekap
+                                    <svg class="ml-auto h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                </button>
+                                <div x-show="open" @click.away="open=false" class="mt-1 ml-3 space-y-1">
+                                    <a href="{{ route('dosen.laporan.index') }}" @click="sidebarOpen = false" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->routeIs('dosen.laporan.index') ? 'bg-indigo-50 text-indigo-600' : '' }}">Data Laporan</a>
+                                    <a href="{{ route('dosen.laporan.perbandingan') }}" @click="sidebarOpen = false" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 {{ request()->routeIs('dosen.laporan.perbandingan') ? 'bg-indigo-50 text-indigo-600' : '' }}">Perbandingan</a>
+                                </div>
+                            </div>
+                            <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                                @csrf
+                                <button type="submit" class="w-full text-left flex items-center px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600">Logout</button>
+                            </form>
+                        </nav>
+                    </div>
+                </aside>
+
                 <!-- Main -->
                 <div class="flex-1 flex flex-col min-w-0">
                     <!-- Topbar -->
-                    <header class="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 sticky top-0 z-10">
-                        <div class="flex items-center gap-2 md:hidden">
-                            <span class="text-slate-500">☰</span>
-                        </div>
-                        <div class="flex-1"></div>
-                        <div class="flex items-center gap-4">
-                            <div class="h-9 w-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">A</div>
-                            <div class="text-right">
-                                <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name ?? 'Dosen' }}</p>
-                                <p class="text-xs text-slate-500">Dosen</p>
+                    <header class="h-16 flex items-center justify-between px-4 md:px-6 bg-white border-b border-slate-200 sticky top-0 z-30">
+                        <button @click="sidebarOpen = !sidebarOpen" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                            <svg class="h-6 w-6" :class="sidebarOpen ? 'hidden' : 'block'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                            <svg class="h-6 w-6" :class="sidebarOpen ? 'block' : 'hidden'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        <div class="flex-1 hidden md:block"></div>
+                        <div x-data="{ open: false }" class="relative flex items-center gap-2 md:gap-4">
+                            <button @click="open = !open" class="flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <div class="h-8 w-8 md:h-9 md:w-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-lg shadow-indigo-500/20">A</div>
+                                <div class="hidden md:block text-right">
+                                    <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name ?? 'Dosen' }}</p>
+                                    <p class="text-xs text-slate-500">Dosen</p>
+                                </div>
+                                <svg class="h-4 w-4 text-slate-500 hidden md:block" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" @click.away="open=false" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden" style="top: 100%; margin-top: 0.5rem;">
+                                <!-- Header -->
+                                <div class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-slate-50 border-b border-slate-200">
+                                    <p class="text-sm font-semibold text-slate-900">{{ auth()->user()->name ?? 'Dosen' }}</p>
+                                    <p class="text-xs text-slate-500">{{ auth()->user()->email ?? 'dosen@example.com' }}</p>
+                                </div>
+                                
+                                <!-- Menu Items -->
+                                <div class="py-2">
+                                    <a href="{{ route('profile.dosen.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span>Lihat Profile</span>
+                                    </a>
+                                    <a href="{{ route('profile.dosen.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                        <span>Ganti Password</span>
+                                    </a>
+                                </div>
+                                
+                                <!-- Divider -->
+                                <div class="border-t border-slate-200"></div>
+                                
+                                <!-- Logout -->
+                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </header>
 
                     <!-- Content -->
-                    <main class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+                    <main class="flex-1 p-3 md:p-4 lg:p-8 overflow-y-auto">
                         {{ $slot }}
                     </main>
                     {{-- ======================== FOOTER ======================== --}}

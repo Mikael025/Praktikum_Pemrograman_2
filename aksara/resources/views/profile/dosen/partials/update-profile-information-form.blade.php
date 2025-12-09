@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5">
+    <form method="post" action="{{ route('profile.dosen.update') }}" class="mt-6 space-y-5">
         @csrf
         @method('patch')
 
@@ -30,21 +30,34 @@
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                    <p class="text-sm mt-2 text-slate-700">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                        <button form="send-verification" class="underline text-sm text-indigo-600 hover:text-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                        <p class="mt-2 font-medium text-sm text-emerald-600">
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif
                 </div>
             @endif
+        </div>
+
+        <!-- Dosen-specific fields -->
+        <div>
+            <x-input-label for="position" :value="__('Jabatan')" class="text-slate-700 font-semibold" />
+            <x-text-input id="position" name="position" type="text" class="mt-2 block w-full border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500" :value="old('position', $user->position ?? '')" autocomplete="job-title" />
+            <x-input-error class="mt-2" :messages="$errors->get('position')" />
+        </div>
+
+        <div>
+            <x-input-label for="department" :value="__('Departemen')" class="text-slate-700 font-semibold" />
+            <x-text-input id="department" name="department" type="text" class="mt-2 block w-full border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500" :value="old('department', $user->department ?? '')" autocomplete="organization" />
+            <x-input-error class="mt-2" :messages="$errors->get('department')" />
         </div>
 
         <div class="flex items-center gap-4 pt-4">

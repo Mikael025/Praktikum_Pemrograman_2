@@ -98,11 +98,18 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/documents/{type}/{document}/reject', [App\Http\Controllers\DocumentController::class, 'reject'])->name('documents.reject');
 });
 
-// auth routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Admin profile routes
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/admin/profile', [App\Http\Controllers\ProfileAdminController::class, 'edit'])->name('profile.admin.edit');
+    Route::patch('/admin/profile', [App\Http\Controllers\ProfileAdminController::class, 'update'])->name('profile.admin.update');
+    Route::delete('/admin/profile', [App\Http\Controllers\ProfileAdminController::class, 'destroy'])->name('profile.admin.destroy');
+});
+
+// Dosen profile routes
+Route::middleware(['auth', 'verified', 'role:dosen'])->group(function () {
+    Route::get('/dosen/profile', [App\Http\Controllers\ProfileDosenController::class, 'edit'])->name('profile.dosen.edit');
+    Route::patch('/dosen/profile', [App\Http\Controllers\ProfileDosenController::class, 'update'])->name('profile.dosen.update');
+    Route::delete('/dosen/profile', [App\Http\Controllers\ProfileDosenController::class, 'destroy'])->name('profile.dosen.destroy');
 });
 
 require __DIR__.'/auth.php';
