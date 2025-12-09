@@ -46,7 +46,7 @@ class Pengabdian extends Model
      */
     public function canBeEditedByDosen(): bool
     {
-        return in_array($this->status, ['diusulkan', 'lolos_perlu_revisi', 'revisi_pra_final']);
+        return in_array($this->status, ['diusulkan', 'lolos', 'lolos_perlu_revisi', 'revisi_pra_final']);
     }
 
     /**
