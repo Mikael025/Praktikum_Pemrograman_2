@@ -106,10 +106,11 @@
                 <button id="close-menu" class="absolute top-6 right-6 p-2">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
-                <a href="{{ route('public.home') }}" class="text-2xl font-bold hover:text-amber-400">Beranda</a>
-                <a href="{{ route('public.visimisi') }}" class="text-2xl font-bold hover:text-amber-400">Visi & Misi</a>
-                <a href="{{ route('public.news', ['category' => 'semua']) }}" class="text-2xl font-bold hover:text-amber-400">Berita</a>
-                <a href="{{ route('login') }}" class="px-8 py-3 bg-indigo-600 rounded-full font-bold shadow-lg shadow-indigo-500/50">Masuk Portal</a>
+                <a href="{{ route('public.home') }}" class="text-2xl font-bold hover:text-amber-400 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('translate-x-full')">Beranda</a>
+                <a href="{{ route('public.visimisi') }}" class="text-2xl font-bold hover:text-amber-400 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('translate-x-full')">Visi & Misi</a>
+                <a href="{{ route('public.news', ['category' => 'semua']) }}" class="text-2xl font-bold hover:text-amber-400 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('translate-x-full')">Informasi/Berita</a>
+                <a href="{{ route('public.downloads') }}" class="text-2xl font-bold hover:text-amber-400 transition-colors" onclick="document.getElementById('mobile-menu').classList.add('translate-x-full')">Unduh</a>
+                <a href="{{ route('login') }}" class="px-8 py-3 bg-indigo-600 rounded-full font-bold shadow-lg shadow-indigo-500/50 hover:bg-indigo-700 transition-colors">Masuk Portal</a>
             </div>
         </header>
 
@@ -138,7 +139,7 @@
                             </p>
                             
                             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                                <a href="#" class="sm:px-10 px-20 py-4 bg-white text-indigo-950 rounded-full font-bold hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 transform hover:-translate-y-1">
+                                <a href="#inovasi-terkini" class="sm:px-10 px-20 py-4 bg-white text-indigo-950 rounded-full font-bold hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-900/20 transform hover:-translate-y-1">
                                     Mulai Jelajahi
                                 </a>
                             </div>
@@ -160,8 +161,8 @@
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     </div>
                                     <div>
-                                        <p class="text-xs text-slate-500 font-bold uppercase">Proyek Selesai</p>
-                                        <p class="text-xl font-bold text-slate-800">120+</p>
+                                        <p class="text-xs text-slate-500 font-bold uppercase">Kegiatan Selesai</p>
+                                        <p class="text-xl font-bold text-slate-800 counter" data-target="{{ ($stats['penelitian_selesai'] ?? 0) + ($stats['pengabdian_selesai'] ?? 0) }}">0</p>
                                     </div>
                                 </div>
                             </div>
@@ -193,7 +194,7 @@
             </section>
 
             {{-- ======================== FEATURED RESEARCH ======================== --}}
-            <section class="py-24 bg-slate-50">
+            <section class="py-24 bg-slate-50" id="inovasi-terkini">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="text-center mb-16 fade-in-up">
                         <h2 class="text-indigo-600 font-bold tracking-wide uppercase mb-2">Inovasi Terkini</h2>
@@ -278,7 +279,7 @@
 
                     <div class="mt-12 text-center">
                         <a href="{{ route('public.downloads') }}" class="inline-block px-6 py-3 border-2 border-slate-200 text-slate-600 font-bold rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-colors">
-                            Lihat Arsip Penelitian
+                            Lihat Arsip Penelitian dan Pengabdian
                         </a>
                     </div>
                 </div>
@@ -297,7 +298,7 @@
                         Bergabunglah dengan jaringan peneliti dan praktisi kami untuk menciptakan solusi yang berdampak luas bagi Indonesia.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="#" class="px-8 py-4 bg-amber-500 text-slate-900 rounded-full font-bold hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+                        <a href="https://wa.me/?text=Halo%20AKSARA" class="px-8 py-4 bg-amber-500 text-slate-900 rounded-full font-bold hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
                             Hubungi Kami
                         </a>
                         <a href="{{ route('login') }}" class="px-8 py-4 bg-slate-800 border border-slate-700 text-white rounded-full font-bold hover:bg-slate-700 transition-colors">
