@@ -114,7 +114,8 @@ Route::get('/informasi-berita', function () {
 })->name('public.news.index');
 Route::get('/informasi-berita/{category}', [App\Http\Controllers\PublicController::class, 'newsByCategory'])->name('public.news');
 Route::get('/informasi-berita/{category}/{slug}', [App\Http\Controllers\PublicController::class, 'newsDetail'])->name('public.news.detail');
-Route::view('/unduh', 'public.downloads')->name('public.downloads');
+Route::get('/unduh', [App\Http\Controllers\PublicController::class, 'downloads'])->name('public.downloads');
+Route::get('/unduh/{type}/{id}', [App\Http\Controllers\PublicController::class, 'downloadDocument'])->name('public.download.document');
 
 // Backward compatibility routes
 Route::redirect('/informasi-berita/umum', '/informasi-berita/umum', 301)->name('public.news.umum');
