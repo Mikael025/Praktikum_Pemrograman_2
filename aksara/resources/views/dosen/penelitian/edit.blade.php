@@ -21,7 +21,7 @@
 
         <!-- Status Info -->
         <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
-            <strong>Status Saat Ini:</strong> 
+            <strong>Status Saat Ini:</strong>
             <x-status-badge :status="$penelitian->status" />
             @if($penelitian->catatan_verifikasi)
                 <div class="mt-2">
@@ -71,11 +71,11 @@
                     <!-- Upload Dokumen Section -->
                     <div class="border-t pt-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Upload Dokumen</h3>
-                        
+
                         <!-- Proposal File -->
                         <div class="mb-4">
                             <label for="proposal_file" class="block text-sm font-medium text-gray-700">
-                                File Proposal 
+                                File Proposal
                                 @if($penelitian->requiresProposal())
                                     <span class="text-red-500">*</span>
                                 @endif
@@ -86,11 +86,11 @@
                                 @endphp
                                 <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
                                     <p class="text-sm text-green-700">
-                                        <strong>File sudah diupload:</strong> 
+                                        <strong>File sudah diupload:</strong>
                                         {{ $proposalDoc->nama_file }}
                                     </p>
                                     @if($penelitian->status !== 'selesai')
-                                        <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $proposalDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file ini?')">
+                                        {{-- <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $proposalDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
@@ -99,7 +99,14 @@
                                                 </svg>
                                                 Hapus
                                             </button>
-                                        </form>
+                                        </form> --}}
+                                        <button
+                                            type="button"
+                                            onclick="deleteDocument('{{ route('dosen.penelitian.delete-document', [$penelitian, $proposalDoc]) }}')"
+                                            class="text-red-600 hover:text-red-800 text-sm font-medium"
+                                        >
+                                            Hapus
+                                        </button>
                                     @endif
                                 </div>
                             @endif
@@ -114,7 +121,7 @@
                         @if($penelitian->requiresFinalDocuments())
                             <div class="mb-4">
                                 <label for="laporan_akhir_file" class="block text-sm font-medium text-gray-700">
-                                    File Laporan Akhir 
+                                    File Laporan Akhir
                                     @if(!$penelitian->documents()->where('jenis_dokumen', 'laporan_akhir')->exists())
                                         <span class="text-red-500">*</span>
                                     @endif
@@ -125,11 +132,11 @@
                                     @endphp
                                     <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
                                         <p class="text-sm text-green-700">
-                                            <strong>File sudah diupload:</strong> 
+                                            <strong>File sudah diupload:</strong>
                                             {{ $laporanDoc->nama_file }}
                                         </p>
                                         @if($penelitian->status !== 'selesai')
-                                            <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $laporanDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file ini?')">
+                                            {{-- <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $laporanDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file ini?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
@@ -138,7 +145,14 @@
                                                     </svg>
                                                     Hapus
                                                 </button>
-                                            </form>
+                                            </form> --}}
+                                            <button
+                                                    type="button"
+                                                    onclick="deleteDocument('{{ route('dosen.penelitian.delete-document', [$penelitian, $laporanDoc]) }}')"
+                                                    class="text-red-600 hover:text-red-800 text-sm font-medium"
+                                                >
+                                                    Hapus
+                                            </button>
                                         @endif
                                     </div>
                                 @endif
@@ -162,7 +176,7 @@
                                         <div class="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-md">
                                             <span class="text-sm text-green-700">{{ $doc->nama_file }}</span>
                                             @if($penelitian->status !== 'selesai')
-                                                <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $doc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
+                                                {{-- <form action="{{ route('dosen.penelitian.delete-document', [$penelitian, $doc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs">
@@ -171,7 +185,14 @@
                                                         </svg>
                                                         Hapus
                                                     </button>
-                                                </form>
+                                                </form> --}}
+                                                <button
+                                                        type="button"
+                                                        onclick="deleteDocument('{{ route('dosen.penelitian.delete-document', [$penelitian, $doc]) }}')"
+                                                        class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs"
+                                                >
+                                                        Hapus
+                                                </button>
                                             @endif
                                         </div>
                                     @endforeach
@@ -192,6 +213,37 @@
                 </div>
             </form>
         </div>
+
+        <script>
+            function deleteDocument(url) {
+                if (!confirm("Apakah Anda yakin ingin menghapus file ini?")) {
+                    return;
+                }
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = url;
+
+                // CSRF token
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '_token';
+                token.value = '{{ csrf_token() }}';
+
+                // Spoof DELETE method
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'DELETE';
+
+                form.appendChild(token);
+                form.appendChild(method);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        </script>
+
 
         <!-- Upload New Version Section -->
         @if($penelitian->documents->count() > 0)

@@ -21,7 +21,7 @@
 
         <!-- Status Info -->
         <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
-            <strong>Status Saat Ini:</strong> 
+            <strong>Status Saat Ini:</strong>
             <x-status-badge :status="$pengabdian->status" />
             @if($pengabdian->catatan_verifikasi)
                 <div class="mt-2">
@@ -79,11 +79,11 @@
                     <!-- Upload Dokumen Section -->
                     <div class="border-t pt-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Upload Dokumen</h3>
-                        
+
                         <!-- Proposal File -->
                         <div class="mb-4">
                             <label for="proposal_file" class="block text-sm font-medium text-gray-700">
-                                File Proposal 
+                                File Proposal
                                 @if($pengabdian->requiresProposal())
                                     <span class="text-red-500">*</span>
                                 @endif
@@ -95,7 +95,7 @@
                                 <div class="mt-2 mb-2 flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-md">
                                     <span class="text-sm text-green-700">File sudah diupload: {{ $proposalDoc->nama_file }}</span>
                                     @if($pengabdian->status !== 'selesai')
-                                        <form action="{{ route('dosen.pengabdian.delete-document', [$pengabdian, $proposalDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
+                                        {{-- <form action="{{ route('dosen.pengabdian.delete-document', [$pengabdian, $proposalDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs">
@@ -104,7 +104,18 @@
                                                 </svg>
                                                 Hapus
                                             </button>
-                                        </form>
+                                        </form> --}}
+
+                                        <button
+                                            type="button"
+                                            onclick="deleteDocument('{{ route('dosen.pengabdian.delete-document', [$pengabdian, $proposalDoc]) }}')"
+                                            class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            Hapus
+                                        </button>
                                     @endif
                                 </div>
                             @endif
@@ -119,7 +130,7 @@
                         @if($pengabdian->requiresFinalDocuments())
                             <div class="mb-4">
                                 <label for="laporan_akhir_file" class="block text-sm font-medium text-gray-700">
-                                    File Laporan Akhir 
+                                    File Laporan Akhir
                                     @if(!$pengabdian->documents()->where('jenis_dokumen', 'laporan_akhir')->exists())
                                         <span class="text-red-500">*</span>
                                     @endif
@@ -131,7 +142,7 @@
                                     <div class="mt-2 mb-2 flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-md">
                                         <span class="text-sm text-green-700">File sudah diupload: {{ $laporanDoc->nama_file }}</span>
                                         @if($pengabdian->status !== 'selesai')
-                                            <form action="{{ route('dosen.pengabdian.delete-document', [$pengabdian, $laporanDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
+                                            {{-- <form action="{{ route('dosen.pengabdian.delete-document', [$pengabdian, $laporanDoc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs">
@@ -140,7 +151,19 @@
                                                     </svg>
                                                     Hapus
                                                 </button>
-                                            </form>
+                                            </form> --}}
+
+                                            <button
+                                                type="button"
+                                                onclick="deleteDocument('{{ route('dosen.pengabdian.delete-document', [$pengabdian, $proposalDoc]) }}')"
+                                                class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Hapus
+                                            </button>
+
                                         @endif
                                     </div>
                                 @endif
@@ -164,7 +187,7 @@
                                         <div class="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-md">
                                             <span class="text-sm text-green-700">{{ $doc->nama_file }}</span>
                                             @if($pengabdian->status !== 'selesai')
-                                                <form action="{{ route('dosen.pengabdian.delete-document', [$pengabdian, $doc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
+                                                {{-- <form action="{{ route('dosen.pengabdian.delete-document', [$pengabdian, $doc]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus dokumen ini?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs">
@@ -173,7 +196,19 @@
                                                         </svg>
                                                         Hapus
                                                     </button>
-                                                </form>
+                                                </form> --}}
+
+                                                <button
+                                                    type="button"
+                                                    onclick="deleteDocument('{{ route('dosen.pengabdian.delete-document', [$pengabdian, $doc]) }}')"
+                                                    class="text-red-600 hover:text-red-800 flex items-center gap-1 text-xs"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Hapus
+                                                </button>
+
                                             @endif
                                         </div>
                                     @endforeach
@@ -194,6 +229,34 @@
                 </div>
             </form>
         </div>
+
+        <script>
+            function deleteDocument(url) {
+                if (!confirm("Yakin ingin menghapus dokumen ini?")) return;
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = url;
+
+                // Token
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = '{{ csrf_token() }}';
+
+                // Method DELETE
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'DELETE';
+
+                form.appendChild(csrf);
+                form.appendChild(method);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        </script>
+
 
         <!-- Upload Versi Baru Dokumen -->
         @php
