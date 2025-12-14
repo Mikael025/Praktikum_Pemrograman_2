@@ -1,4 +1,15 @@
 <x-guest-layout>
+    <style>
+        /* Mesh Gradient Background - Sama seperti Hero Section */
+        .bg-mesh-login {
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        }
+    </style>
+
     <div class="flex flex-col lg:flex-row min-h-screen bg-white font-sans overflow-hidden">
 
         <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 relative z-10 overflow-y-auto lg:overflow-y-visible">
@@ -71,29 +82,19 @@
             </form>
         </div>
 
-        <div class="hidden lg:flex lg:w-1/2 panel-gradient relative overflow-hidden items-center justify-center text-white p-12 min-h-screen z-0">
-            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-400 opacity-20 blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-900 opacity-30 blur-3xl"></div>
+        <div class="hidden lg:flex lg:w-1/2 bg-mesh-login relative overflow-hidden items-center justify-center text-white p-12 min-h-screen z-0">
+            {{-- Noise Overlay --}}
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
+            
+            {{-- Glow Effects --}}
+            <div class="absolute -top-10 -right-10 w-72 h-72 bg-amber-400/20 rounded-full blur-3xl filter mix-blend-screen"></div>
+            <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-indigo-500/30 rounded-full blur-3xl filter mix-blend-screen"></div>
 
             <div class="relative z-10 max-w-lg">
-                <div class="mb-6">
-                    <span class="bg-blue-800 bg-opacity-50 text-blue-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide border border-blue-400">Pusat Inovasi</span>
-                </div>
-                <h1 class="text-5xl font-bold leading-tight mb-6">Mewujudkan Solusi Inovatif.</h1>
-                <p class="text-lg text-blue-100 leading-relaxed mb-8">
+                <h1 class="text-5xl font-bold leading-tight mb-6">Pusat Inovasi dalam Mewujudkan Solusi Inovatif.</h1>
+                <p class="text-lg text-blue-900 leading-relaxed mb-8">
                     Bergabunglah bersama kami untuk memajukan komunitas melalui penelitian dan pengabdian yang berdampak nyata.
                 </p>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
-                        <div class="text-3xl font-bold">120+</div>
-                        <div class="text-sm text-blue-100">Penelitian Aktif</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
-                        <div class="text-3xl font-bold">3000+</div>
-                        <div class="text-sm text-blue-100">Penerima Manfaat</div>
-                    </div>
-                </div>
             </div>
         </div>
 
