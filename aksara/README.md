@@ -295,8 +295,3 @@ Proyek ini dilisensikan di bawah [MIT License](LICENSE).
 
 - **Development Team** - Praktikum Pemrograman 2
 
-## Support
-
-Untuk pertanyaan atau dukungan, hubungi:
-- Email: support@aksara.test
-- Documentation: [Wiki](https://github.com/yourusername/aksara/wiki)
