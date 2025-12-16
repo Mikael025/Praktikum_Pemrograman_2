@@ -1,14 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Penelitian;
 use App\Models\Pengabdian;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class AdminDashboardController extends Controller
+/**
+ * Controller untuk dashboard admin
+ * 
+ * Menampilkan statistik penelitian dan pengabdian, grafik tren bulanan,
+ * top researchers, dan submission heatmap untuk monitoring kegiatan dosen.
+ */
+class DashboardController extends Controller
 {
+    /**
+     * Menampilkan halaman dashboard admin dengan statistik lengkap
+     * 
+     * @param Request $request HTTP request dengan optional parameter 'year' untuk filter tahun
+     * @return \Illuminate\View\View View dashboard dengan data statistik
+     */
     public function index(Request $request)
     {
         try {
@@ -230,7 +243,10 @@ class AdminDashboardController extends Controller
     }
     
     /**
-     * Get top performing researchers
+     * API endpoint untuk mendapatkan top 10 peneliti berdasarkan jumlah penelitian dan pengabdian
+     * 
+     * @param Request $request HTTP request dengan optional parameter 'year' untuk filter tahun
+     * @return \Illuminate\Http\JsonResponse JSON response berisi array top researchers dengan statistik
      */
     public function topResearchers(Request $request)
     {
@@ -280,7 +296,13 @@ class AdminDashboardController extends Controller
     }
     
     /**
-     * Get submission heatmap data
+     * API endpoint untuk mendapatkan data submission heatmap (pengajuan per tanggal)
+     * 
+     * Menghasilkan data calendar heatmap untuk visualisasi distribusi pengajuan
+     * penelitian dan pengabdian sepanjang tahun.
+     * 
+     * @param Request $request HTTP request dengan optional parameter 'year' untuk filter tahun
+     * @return \Illuminate\Http\JsonResponse JSON response berisi array tanggal dengan jumlah submissions
      */
     public function submissionHeatmap(Request $request)
     {
@@ -319,6 +341,12 @@ class AdminDashboardController extends Controller
         ]);
     }
     
+    /**
+     * Helper untuk mendapatkan label action berdasarkan status
+     * 
+     * @param string $status Status penelitian/pengabdian
+     * @return string Label action yang user-friendly
+     */
     private function getActionFromStatus($status)
     {
         return match($status) {

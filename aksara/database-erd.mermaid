@@ -1,0 +1,155 @@
+erDiagram
+    %% ========================================
+    %% SISTEM AKSARA - DATABASE ERD
+    %% Entity Relationship Diagram
+    %% ========================================
+
+    USERS ||--|| LECTURER_PROFILES : "has one"
+    USERS ||--o{ PENELITIAN : "creates"
+    USERS ||--o{ PENGABDIAN : "creates"
+    USERS ||--o{ STATUS_HISTORY : "changes status"
+    USERS ||--o{ DOCUMENT_VERSIONS : "uploads version"
+    
+    PENELITIAN ||--o{ PENELITIAN_DOCUMENTS : "has"
+    PENELITIAN ||--o{ STATUS_HISTORY : "tracks status (polymorphic)"
+    
+    PENGABDIAN ||--o{ PENGABDIAN_DOCUMENTS : "has"
+    PENGABDIAN ||--o{ STATUS_HISTORY : "tracks status (polymorphic)"
+
+    %% ========================================
+    %% TABLE: USERS
+    %% ========================================
+    USERS {
+        bigint id PK "AUTO_INCREMENT"
+        varchar name "NOT NULL"
+        varchar email "UNIQUE, NOT NULL"
+        timestamp email_verified_at "NULLABLE"
+        varchar password "NOT NULL"
+        varchar role "DEFAULT 'dosen', ENUM: admin, dosen"
+        varchar remember_token "NULLABLE"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: LECTURER_PROFILES
+    %% ========================================
+    LECTURER_PROFILES {
+        bigint id PK "AUTO_INCREMENT"
+        bigint user_id FK "UNIQUE, NOT NULL, references users.id"
+        varchar nip "UNIQUE, NOT NULL, NIDN/NIP"
+        varchar affiliation "NOT NULL, Institusi"
+        varchar citizenship "NOT NULL, Kewarganegaraan"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: PENELITIAN
+    %% ========================================
+    PENELITIAN {
+        bigint id PK "AUTO_INCREMENT"
+        bigint user_id FK "NOT NULL, references users.id"
+        varchar judul "NOT NULL"
+        year tahun "NOT NULL"
+        text tim_peneliti "NOT NULL, JSON array"
+        varchar sumber_dana "NOT NULL"
+        enum status "DEFAULT 'diusulkan', diusulkan|tidak_lolos|lolos_perlu_revisi|lolos|revisi_pra_final|selesai"
+        text catatan_verifikasi "NULLABLE, feedback dari admin"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: PENELITIAN_DOCUMENTS
+    %% ========================================
+    PENELITIAN_DOCUMENTS {
+        bigint id PK "AUTO_INCREMENT"
+        bigint penelitian_id FK "NOT NULL, references penelitian.id"
+        enum jenis_dokumen "NOT NULL, proposal|laporan_akhir|sertifikat|dokumen_pendukung"
+        varchar nama_file "NOT NULL"
+        varchar path_file "NOT NULL"
+        timestamp uploaded_at "NOT NULL"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: PENGABDIAN
+    %% ========================================
+    PENGABDIAN {
+        bigint id PK "AUTO_INCREMENT"
+        bigint user_id FK "NOT NULL, references users.id"
+        varchar judul "NOT NULL"
+        year tahun "NOT NULL"
+        text tim_pelaksana "NOT NULL, JSON array"
+        varchar lokasi "NOT NULL"
+        varchar mitra "NOT NULL, Partner/Mitra"
+        enum status "DEFAULT 'diusulkan', diusulkan|tidak_lolos|lolos_perlu_revisi|lolos|revisi_pra_final|selesai"
+        text catatan_verifikasi "NULLABLE, feedback dari admin"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: PENGABDIAN_DOCUMENTS
+    %% ========================================
+    PENGABDIAN_DOCUMENTS {
+        bigint id PK "AUTO_INCREMENT"
+        bigint pengabdian_id FK "NOT NULL, references pengabdian.id"
+        enum jenis_dokumen "NOT NULL, proposal|laporan_akhir|sertifikat|dokumen_pendukung"
+        varchar nama_file "NOT NULL"
+        varchar path_file "NOT NULL"
+        timestamp uploaded_at "NOT NULL"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: STATUS_HISTORY (POLYMORPHIC)
+    %% ========================================
+    STATUS_HISTORY {
+        bigint id PK "AUTO_INCREMENT"
+        varchar statusable_type "NOT NULL, POLYMORPHIC: Penelitian|Pengabdian"
+        bigint statusable_id "NOT NULL, POLYMORPHIC: penelitian.id|pengabdian.id"
+        varchar old_status "NULLABLE, max 50"
+        varchar new_status "NOT NULL, max 50"
+        bigint changed_by_user_id FK "NOT NULL, references users.id"
+        text notes "NULLABLE, catatan perubahan status"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: DOCUMENT_VERSIONS
+    %% ========================================
+    DOCUMENT_VERSIONS {
+        bigint id PK "AUTO_INCREMENT"
+        varchar document_type "NOT NULL, penelitian|pengabdian"
+        bigint document_id "NOT NULL, ID dokumen penelitian/pengabdian"
+        integer version_number "NOT NULL, versi ke-N"
+        varchar nama_file "NOT NULL"
+        varchar path_file "NOT NULL"
+        text change_notes "NULLABLE, catatan perubahan"
+        bigint uploaded_by FK "NOT NULL, references users.id"
+        timestamp uploaded_at "NOT NULL"
+        timestamp deleted_at "NULLABLE, soft delete"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ========================================
+    %% TABLE: INFORMASI
+    %% ========================================
+    INFORMASI {
+        bigint id PK "AUTO_INCREMENT"
+        varchar title "NOT NULL"
+        varchar slug "UNIQUE, NOT NULL, URL-friendly"
+        varchar image_path "NULLABLE, path gambar thumbnail"
+        longtext content "NOT NULL"
+        enum category "NOT NULL, penelitian|pengabdian|umum"
+        enum visibility "DEFAULT 'semua', admin|dosen|semua"
+        datetime published_at "NULLABLE, tanggal publikasi"
+        timestamp created_at
+        timestamp updated_at
+    }

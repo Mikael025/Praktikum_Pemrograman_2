@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dosen;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Penelitian;
@@ -14,11 +15,22 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-
-class DosenPenelitianController extends Controller
+/**
+ * Controller untuk manajemen penelitian oleh dosen
+ * 
+ * Menyediakan CRUD operations untuk penelitian termasuk upload dokumen,
+ * tracking status verifikasi, dan view history perubahan status.
+ */
+class PenelitianController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar penelitian milik dosen yang sedang login
+     * 
+     * Mendukung filter berdasarkan tahun, status, dan search query.
+     * Menampilkan statistik penelitian berdasarkan status.
+     * 
+     * @param Request $request HTTP request dengan optional parameters: year, status, search
+     * @return \Illuminate\View\View View daftar penelitian dengan statistik
      */
     public function index(Request $request)
     {
@@ -64,7 +76,9 @@ class DosenPenelitianController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form untuk membuat penelitian baru
+     * 
+     * @return \Illuminate\View\View View form create penelitian
      */
     public function create()
     {
@@ -72,7 +86,14 @@ class DosenPenelitianController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan penelitian baru ke database dengan dokumen pendukung
+     * 
+     * Menggunakan database transaction untuk memastikan data konsisten.
+     * Upload multiple files dan create records di tabel penelitian_documents.
+     * 
+     * @param StorePenelitianRequest $request Validated request berisi data penelitian dan files
+     * @return \Illuminate\Http\RedirectResponse Redirect ke index dengan status message
+     * @throws \Exception Jika terjadi error saat transaction
      */
     public function store(StorePenelitianRequest $request)
     {
@@ -126,7 +147,11 @@ class DosenPenelitianController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail penelitian dengan dokumen dan status history
+     * 
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\View\View View detail penelitian
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Jika penelitian bukan milik user yang login
      */
     public function show(Penelitian $penelitian)
     {
@@ -138,7 +163,13 @@ class DosenPenelitianController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Menampilkan form edit penelitian
+     * 
+     * Hanya penelitian dengan status tertentu yang dapat diedit.
+     * 
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\View\View View form edit penelitian
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Jika penelitian bukan milik user atau status tidak valid
      */
     public function edit(Penelitian $penelitian)
     {
@@ -149,7 +180,14 @@ class DosenPenelitianController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update data penelitian yang sudah ada
+     * 
+     * Mendukung update dokumen pendukung. Menggunakan transaction untuk konsistensi data.
+     * 
+     * @param UpdatePenelitianRequest $request Validated request berisi data update
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect ke index dengan status message
+     * @throws \Exception Jika terjadi error saat transaction
      */
     public function update(UpdatePenelitianRequest $request, Penelitian $penelitian)
     {

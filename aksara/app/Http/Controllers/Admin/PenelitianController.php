@@ -1,20 +1,46 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Penelitian;
 use App\Models\StatusHistory;
 use App\Models\User;
 use App\Http\Requests\AdminPenelitianRequest;
 use App\Exceptions\WorkflowException;
 use App\Exceptions\InvalidStatusTransitionException;
+use App\Services\StatusWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class AdminPenelitianController extends Controller
+/**
+ * Controller untuk verifikasi dan manajemen penelitian oleh admin
+ * 
+ * Menggunakan StatusWorkflowService untuk mengelola transisi status penelitian
+ * dengan workflow yang konsisten dan ter-log dengan baik.
+ */
+class PenelitianController extends Controller
 {
+    protected StatusWorkflowService $workflowService;
+
+    /**
+     * Constructor dengan dependency injection StatusWorkflowService
+     * 
+     * @param StatusWorkflowService $workflowService Service untuk workflow management
+     */
+    public function __construct(StatusWorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
+    }
+
+    /**
+     * Menampilkan daftar semua penelitian dengan filter dan statistik
+     * 
+     * @param Request $request HTTP request dengan optional parameters: year, status, search
+     * @return \Illuminate\View\View View daftar penelitian dengan statistik per status
+     */
     public function index(Request $request)
     {
         $query = Penelitian::with('user');
@@ -55,18 +81,37 @@ class AdminPenelitianController extends Controller
         return view('admin.penelitian.index', compact('penelitian', 'penelitianStats'));
     }
     
+    /**
+     * Menampilkan detail penelitian dengan dokumen dan history status
+     * 
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\View\View View detail penelitian lengkap
+     */
     public function show(Penelitian $penelitian)
     {
         $penelitian->load(['user', 'documents', 'statusHistory.changedBy']);
         return view('admin.penelitian.show', compact('penelitian'));
     }
     
+    /**
+     * Menampilkan form edit untuk penelitian
+     * 
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\View\View View form edit
+     */
     public function edit(Penelitian $penelitian)
     {
         $penelitian->load('user');
         return view('admin.penelitian.edit', compact('penelitian'));
     }
     
+    /**
+     * Update data penelitian (bukan status)
+     * 
+     * @param AdminPenelitianRequest $request Validated request
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
+     */
     public function update(AdminPenelitianRequest $request, Penelitian $penelitian)
     {
         // Admin dapat mengubah status tanpa validasi workflow
@@ -86,238 +131,165 @@ class AdminPenelitianController extends Controller
     }
     
     /**
-     * Set status to tidak_lolos
+     * Set status penelitian menjadi 'tidak_lolos' (rejected)
+     * 
+     * Menggunakan StatusWorkflowService untuk memastikan transisi valid dan tercatat.
+     * 
+     * @param Request $request HTTP request berisi catatan_verifikasi
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
      */
     public function setTidakLolos(Request $request, Penelitian $penelitian)
     {
         try {
-            if (!$penelitian->canTransitionTo('tidak_lolos')) {
-                throw new InvalidStatusTransitionException($penelitian->status, 'tidak_lolos');
-            }
-
             $request->validate([
                 'catatan' => 'required|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $penelitian->status;
-            
-            $penelitian->update([
-                'status' => 'tidak_lolos',
-                'catatan_verifikasi' => $request->catatan
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Penelitian::class,
-                'statusable_id' => $penelitian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'tidak_lolos',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan
-            ]);
-
-            DB::commit();
+            $this->workflowService->transitionStatus(
+                model: $penelitian,
+                targetStatus: 'tidak_lolos',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.penelitian.index')
-                ->with('success', 'Penelitian berhasil ditolak.');
+                ->with('success', $this->workflowService->getSuccessMessage('tidak_lolos', 'Penelitian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Set status to lolos_perlu_revisi
+     * Set status penelitian menjadi 'lolos_perlu_revisi' (accepted with minor revision)
+     * 
+     * @param Request $request HTTP request berisi catatan_verifikasi
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
      */
     public function setLolosPerluRevisi(Request $request, Penelitian $penelitian)
     {
         try {
-            if (!$penelitian->canTransitionTo('lolos_perlu_revisi')) {
-                throw new InvalidStatusTransitionException($penelitian->status, 'lolos_perlu_revisi');
-            }
-
             $request->validate([
                 'catatan' => 'required|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $penelitian->status;
-            
-            $penelitian->update([
-                'status' => 'lolos_perlu_revisi',
-                'catatan_verifikasi' => $request->catatan
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Penelitian::class,
-                'statusable_id' => $penelitian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'lolos_perlu_revisi',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan
-            ]);
-
-            DB::commit();
+            $this->workflowService->transitionStatus(
+                model: $penelitian,
+                targetStatus: 'lolos_perlu_revisi',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.penelitian.index')
-                ->with('success', 'Penelitian lolos dengan revisi.');
+                ->with('success', $this->workflowService->getSuccessMessage('lolos_perlu_revisi', 'Penelitian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Set status to lolos
+     * Set status penelitian menjadi 'lolos' (accepted without revision)
+     * 
+     * @param Request $request HTTP request berisi catatan_verifikasi
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
      */
     public function setLolos(Request $request, Penelitian $penelitian)
     {
         try {
-            if (!$penelitian->canTransitionTo('lolos')) {
-                throw new InvalidStatusTransitionException($penelitian->status, 'lolos');
-            }
-
             $request->validate([
                 'catatan' => 'nullable|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $penelitian->status;
-            
-            $penelitian->update([
-                'status' => 'lolos',
-                'catatan_verifikasi' => $request->catatan ?? 'Lolos'
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Penelitian::class,
-                'statusable_id' => $penelitian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'lolos',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan ?? 'Lolos'
-            ]);
-
-            DB::commit();
+            $this->workflowService->transitionStatus(
+                model: $penelitian,
+                targetStatus: 'lolos',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.penelitian.index')
-                ->with('success', 'Penelitian berhasil disetujui.');
+                ->with('success', $this->workflowService->getSuccessMessage('lolos', 'Penelitian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Set status to revisi_pra_final
+     * Set status penelitian menjadi 'revisi_pra_final' (pre-final revision)
+     * 
+     * @param Request $request HTTP request berisi catatan_verifikasi
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
      */
     public function setRevisiPraFinal(Request $request, Penelitian $penelitian)
     {
         try {
-            if (!$penelitian->canTransitionTo('revisi_pra_final')) {
-                throw new InvalidStatusTransitionException($penelitian->status, 'revisi_pra_final');
-            }
-
             $request->validate([
                 'catatan' => 'required|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $penelitian->status;
-            
-            $penelitian->update([
-                'status' => 'revisi_pra_final',
-                'catatan_verifikasi' => $request->catatan
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Penelitian::class,
-                'statusable_id' => $penelitian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'revisi_pra_final',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan
-            ]);
-
-            DB::commit();
+            $this->workflowService->transitionStatus(
+                model: $penelitian,
+                targetStatus: 'revisi_pra_final',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.penelitian.index')
-                ->with('success', 'Penelitian diminta revisi pra-final.');
+                ->with('success', $this->workflowService->getSuccessMessage('revisi_pra_final', 'Penelitian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Set status to selesai
+     * Set status penelitian menjadi 'selesai' (completed)
+     * 
+     * @param Request $request HTTP request berisi catatan_verifikasi
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
      */
     public function setSelesai(Request $request, Penelitian $penelitian)
     {
         try {
-            if (!$penelitian->canTransitionTo('selesai')) {
-                throw new InvalidStatusTransitionException($penelitian->status, 'selesai');
-            }
-
             $request->validate([
                 'catatan' => 'nullable|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $penelitian->status;
-            
-            $penelitian->update([
-                'status' => 'selesai',
-                'catatan_verifikasi' => 'Penelitian selesai'
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Penelitian::class,
-                'statusable_id' => $penelitian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'selesai',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => 'Penelitian selesai'
-            ]);
-
-            DB::commit();
+            $this->workflowService->transitionStatus(
+                model: $penelitian,
+                targetStatus: 'selesai',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.penelitian.index')
-                ->with('success', 'Penelitian berhasil diselesaikan.');
+                ->with('success', $this->workflowService->getSuccessMessage('selesai', 'Penelitian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Update catatan verifikasi without changing status
-     * Untuk memberikan feedback tambahan pada status revisi
+     * Update catatan verifikasi tanpa mengubah status
+     * 
+     * Berguna untuk menambahkan notes atau feedback tanpa transisi status.
+     * 
+     * @param Request $request HTTP request berisi catatan_verifikasi
+     * @param Penelitian $penelitian Model penelitian (route model binding)
+     * @return \Illuminate\Http\RedirectResponse Redirect dengan status message
      */
     public function updateCatatanVerifikasi(Request $request, Penelitian $penelitian)
     {
@@ -331,27 +303,10 @@ class AdminPenelitianController extends Controller
                 'catatan_verifikasi.max' => 'Catatan verifikasi maksimal 500 karakter.'
             ]);
 
-            DB::beginTransaction();
-
-            $oldCatatan = $penelitian->catatan_verifikasi;
-            
-            $penelitian->update([
-                'catatan_verifikasi' => $request->catatan_verifikasi
-            ]);
-
-            // Log for audit trail
-            Log::info('Catatan verifikasi updated', [
-                'admin_id' => Auth::id(),
-                'admin_name' => Auth::user()->name,
-                'penelitian_id' => $penelitian->id,
-                'penelitian_judul' => $penelitian->judul,
-                'status' => $penelitian->status,
-                'old_catatan' => $oldCatatan,
-                'new_catatan' => $request->catatan_verifikasi,
-                'timestamp' => now()
-            ]);
-
-            DB::commit();
+            $this->workflowService->updateNotes(
+                model: $penelitian,
+                notes: $request->catatan_verifikasi
+            );
 
             return redirect()->back()
                 ->with('success', 'Catatan verifikasi berhasil diperbarui.');
@@ -359,7 +314,6 @@ class AdminPenelitianController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }

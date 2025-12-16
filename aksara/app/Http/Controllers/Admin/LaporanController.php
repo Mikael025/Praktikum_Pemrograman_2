@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Penelitian;
@@ -9,8 +10,20 @@ use App\Models\Pengabdian;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 
-class AdminLaporanController extends Controller
+/**
+ * Controller untuk laporan admin
+ * 
+ * Menyediakan fitur generate laporan penelitian dan pengabdian dengan
+ * filter tahun, status, dan dosen. Mendukung export ke PDF dan CSV.
+ */
+class LaporanController extends Controller
 {
+    /**
+     * Menampilkan halaman laporan dengan statistik dan filter
+     * 
+     * @param Request $request HTTP request dengan optional parameters: year, status, dosen_id
+     * @return \Illuminate\View\View View laporan dengan data statistik
+     */
     public function index(Request $request)
     {
         $year = $request->get('year');
@@ -69,6 +82,12 @@ class AdminLaporanController extends Controller
         return view('admin.laporan.index', compact('penelitian', 'pengabdian', 'stats', 'dosenList', 'topDosen', 'year', 'status', 'dosen_id'));
     }
     
+    /**
+     * Export laporan penelitian dan pengabdian ke format PDF
+     * 
+     * @param Request $request HTTP request dengan optional parameters: year, status, dosen_id
+     * @return \Illuminate\Http\Response Response dengan file PDF untuk download
+     */
     public function exportPdf(Request $request)
     {
         $year = $request->get('year');
@@ -122,6 +141,12 @@ class AdminLaporanController extends Controller
         return $pdf->download($filename);
     }
     
+    /**
+     * Menampilkan halaman perbandingan data penelitian dan pengabdian antar tahun
+     * 
+     * @param Request $request HTTP request
+     * @return \Illuminate\View\View View perbandingan dengan grafik tren tahunan
+     */
     public function perbandingan(Request $request)
     {
         // Get data untuk perbandingan tahunan
@@ -199,6 +224,12 @@ class AdminLaporanController extends Controller
         ));
     }
     
+    /**
+     * Export laporan penelitian dan pengabdian ke format CSV
+     * 
+     * @param Request $request HTTP request dengan optional parameters: year, status, dosen_id
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse Response dengan file CSV untuk download
+     */
     public function exportCsv(Request $request)
     {
         $year = $request->get('year');

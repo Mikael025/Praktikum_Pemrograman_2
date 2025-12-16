@@ -1,0 +1,123 @@
+graph TB
+    %% Actor
+    Admin([Admin])
+
+    %% Use Cases - Informasi/Berita Management
+    CreateInformasi[Create Informasi/Berita]
+    EditInformasi[Edit Informasi/Berita]
+    DeleteInformasi[Delete Informasi/Berita]
+    ViewAllInformasi[View All Informasi]
+    SearchInformasi[Search Informasi]
+    UploadThumbnail[Upload Thumbnail Image]
+    SetKategori[Set Kategori Berita]
+    SetVisibility[Set Visibility Berita]
+    SchedulePublication[Schedule Publication Date]
+    AutoGenerateSlug[Auto Generate Slug]
+
+    %% Use Cases - Laporan/Report Management
+    GenerateOverallReport[Generate Overall Report]
+    FilterReportByYear[Filter Report by Year]
+    FilterReportByStatus[Filter Report by Status]
+    FilterReportByLecturer[Filter Report by Lecturer]
+    ViewSummaryStatistics[View Summary Statistics]
+    ViewProductiveLecturers[View Productive Lecturers List]
+    ExportReportPDF[Export Report to PDF]
+    ExportReportCSV[Export Report to CSV]
+    GenerateComparisonReport[Generate Comparison Report]
+    ViewChartVisualization[View Chart Visualization]
+
+    %% Admin Connections - Informasi
+    Admin --> CreateInformasi
+    Admin --> EditInformasi
+    Admin --> DeleteInformasi
+    Admin --> ViewAllInformasi
+    Admin --> SearchInformasi
+    Admin --> UploadThumbnail
+    Admin --> SetKategori
+    Admin --> SetVisibility
+    Admin --> SchedulePublication
+    Admin --> AutoGenerateSlug
+
+    %% Supporting Use Cases for Include
+    ValidateInformasiData[Validate Informasi Data]
+    SaveInformasiToDatabase[Save Informasi to Database]
+    UploadImageToStorage[Upload Image to Storage]
+    DeleteImageFromStorage[Delete Image from Storage]
+    GenerateSlugFromTitle[Generate Slug from Title]
+    ValidateDateRange[Validate Date Range]
+    FetchActivityData[Fetch Activity Data]
+    CalculateStatistics[Calculate Statistics]
+    FormatReportData[Format Report Data]
+    GeneratePDFDocument[Generate PDF Document]
+    GenerateCSVFile[Generate CSV File]
+    RenderChartData[Render Chart Data]
+
+    %% Supporting Use Cases for Extend
+    PreviewInformasi[Preview Informasi Before Publish]
+    SendPublicationNotification[Send Publication Notification]
+    ScheduleAutoPublish[Schedule Auto Publish]
+    CompareYearOverYear[Compare Year Over Year]
+    FilterByMultipleCategories[Filter by Multiple Categories]
+    EmailReportToStakeholders[Email Report to Stakeholders]
+
+    %% Admin Connections - Laporan
+    Admin --> GenerateOverallReport
+    Admin --> FilterReportByYear
+    Admin --> FilterReportByStatus
+    Admin --> FilterReportByLecturer
+    Admin --> ViewSummaryStatistics
+    Admin --> ViewProductiveLecturers
+    Admin --> ExportReportPDF
+    Admin --> ExportReportCSV
+    Admin --> GenerateComparisonReport
+    Admin --> ViewChartVisualization
+
+    %% Include Relationships
+    CreateInformasi -.->|include| ValidateInformasiData
+    CreateInformasi -.->|include| GenerateSlugFromTitle
+    CreateInformasi -.->|include| SaveInformasiToDatabase
+    EditInformasi -.->|include| ValidateInformasiData
+    EditInformasi -.->|include| SaveInformasiToDatabase
+    DeleteInformasi -.->|include| DeleteImageFromStorage
+    UploadThumbnail -.->|include| UploadImageToStorage
+    GenerateOverallReport -.->|include| FetchActivityData
+    GenerateOverallReport -.->|include| CalculateStatistics
+    GenerateOverallReport -.->|include| FormatReportData
+    FilterReportByYear -.->|include| ValidateDateRange
+    FilterReportByYear -.->|include| FetchActivityData
+    ExportReportPDF -.->|include| FormatReportData
+    ExportReportPDF -.->|include| GeneratePDFDocument
+    ExportReportCSV -.->|include| FormatReportData
+    ExportReportCSV -.->|include| GenerateCSVFile
+    GenerateComparisonReport -.->|include| FetchActivityData
+    GenerateComparisonReport -.->|include| CalculateStatistics
+    ViewChartVisualization -.->|include| RenderChartData
+
+    %% Extend Relationships
+    PreviewInformasi -.->|extend| CreateInformasi
+    PreviewInformasi -.->|extend| EditInformasi
+    SendPublicationNotification -.->|extend| CreateInformasi
+    ScheduleAutoPublish -.->|extend| SchedulePublication
+    CompareYearOverYear -.->|extend| GenerateComparisonReport
+    FilterByMultipleCategories -.->|extend| ViewAllInformasi
+    EmailReportToStakeholders -.->|extend| ExportReportPDF
+
+    style Admin fill:#ff6b6b
+    style ValidateInformasiData fill:#ffeaa7
+    style SaveInformasiToDatabase fill:#ffeaa7
+    style UploadImageToStorage fill:#ffeaa7
+    style DeleteImageFromStorage fill:#ffeaa7
+    style GenerateSlugFromTitle fill:#ffeaa7
+    style ValidateDateRange fill:#ffeaa7
+    style FetchActivityData fill:#ffeaa7
+    style CalculateStatistics fill:#ffeaa7
+    style FormatReportData fill:#ffeaa7
+    style GeneratePDFDocument fill:#ffeaa7
+    style GenerateCSVFile fill:#ffeaa7
+    style RenderChartData fill:#ffeaa7
+    style PreviewInformasi fill:#dfe6e9
+    style SendPublicationNotification fill:#dfe6e9
+    style ScheduleAutoPublish fill:#dfe6e9
+    style CompareYearOverYear fill:#dfe6e9
+    style FilterByMultipleCategories fill:#dfe6e9
+    style EmailReportToStakeholders fill:#dfe6e9

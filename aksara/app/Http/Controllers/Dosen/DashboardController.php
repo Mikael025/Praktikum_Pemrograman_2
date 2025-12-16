@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dosen;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Penelitian;
 use App\Models\Pengabdian;
 use Illuminate\Support\Facades\Auth;
 
-class DosenDashboardController extends Controller
+class DashboardController extends Controller
 {
     public function index(Request $request)
     {

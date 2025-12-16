@@ -1,20 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Pengabdian;
 use App\Models\StatusHistory;
 use App\Models\User;
 use App\Http\Requests\AdminPengabdianRequest;
 use App\Exceptions\WorkflowException;
 use App\Exceptions\InvalidStatusTransitionException;
+use App\Services\StatusWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class AdminPengabdianController extends Controller
+/**
+ * Controller untuk verifikasi dan manajemen pengabdian masyarakat oleh admin
+ * 
+ * Menggunakan StatusWorkflowService untuk mengelola transisi status pengabdian
+ * dengan workflow yang konsisten dan ter-log dengan baik.
+ */
+class PengabdianController extends Controller
 {
+    protected StatusWorkflowService $workflowService;
+
+    /**
+     * Constructor dengan dependency injection StatusWorkflowService
+     * 
+     * @param StatusWorkflowService $workflowService Service untuk workflow management
+     */
+    public function __construct(StatusWorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
+    }
+
     public function index(Request $request)
     {
         $query = Pengabdian::with('user');
@@ -89,230 +109,160 @@ class AdminPengabdianController extends Controller
     
     /**
      * Set status to tidak_lolos
+     * 
+     * @param Request $request
+     * @param Pengabdian $pengabdian
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function setTidakLolos(Request $request, Pengabdian $pengabdian)
     {
         try {
-            if (!$pengabdian->canTransitionTo('tidak_lolos')) {
-                throw new InvalidStatusTransitionException($pengabdian->status, 'tidak_lolos');
-            }
-
+            // Validate catatan required untuk penolakan
             $request->validate([
                 'catatan' => 'required|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $pengabdian->status;
-            
-            $pengabdian->update([
-                'status' => 'tidak_lolos',
-                'catatan_verifikasi' => $request->catatan
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Pengabdian::class,
-                'statusable_id' => $pengabdian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'tidak_lolos',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan
-            ]);
-
-            DB::commit();
+            // Use service untuk handle status transition
+            $this->workflowService->transitionStatus(
+                model: $pengabdian,
+                targetStatus: 'tidak_lolos',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.pengabdian.index')
-                ->with('success', 'Pengabdian berhasil ditolak.');
+                ->with('success', $this->workflowService->getSuccessMessage('tidak_lolos', 'Pengabdian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
      * Set status to lolos_perlu_revisi
+     * 
+     * @param Request $request
+     * @param Pengabdian $pengabdian
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function setLolosPerluRevisi(Request $request, Pengabdian $pengabdian)
     {
         try {
-            if (!$pengabdian->canTransitionTo('lolos_perlu_revisi')) {
-                throw new InvalidStatusTransitionException($pengabdian->status, 'lolos_perlu_revisi');
-            }
-
+            // Validate catatan required untuk feedback revisi
             $request->validate([
                 'catatan' => 'required|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $pengabdian->status;
-            
-            $pengabdian->update([
-                'status' => 'lolos_perlu_revisi',
-                'catatan_verifikasi' => $request->catatan
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Pengabdian::class,
-                'statusable_id' => $pengabdian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'lolos_perlu_revisi',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan
-            ]);
-
-            DB::commit();
+            // Use service untuk handle status transition
+            $this->workflowService->transitionStatus(
+                model: $pengabdian,
+                targetStatus: 'lolos_perlu_revisi',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.pengabdian.index')
-                ->with('success', 'Pengabdian lolos dengan revisi.');
+                ->with('success', $this->workflowService->getSuccessMessage('lolos_perlu_revisi', 'Pengabdian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
      * Set status to lolos
+     * 
+     * @param Request $request
+     * @param Pengabdian $pengabdian
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function setLolos(Request $request, Pengabdian $pengabdian)
     {
         try {
-            if (!$pengabdian->canTransitionTo('lolos')) {
-                throw new InvalidStatusTransitionException($pengabdian->status, 'lolos');
-            }
-
+            // Validate catatan optional untuk approval
             $request->validate([
                 'catatan' => 'nullable|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $pengabdian->status;
-            
-            $pengabdian->update([
-                'status' => 'lolos',
-                'catatan_verifikasi' => $request->catatan ?? 'Lolos'
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Pengabdian::class,
-                'statusable_id' => $pengabdian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'lolos',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan ?? 'Lolos'
-            ]);
-
-            DB::commit();
+            // Use service untuk handle status transition
+            $this->workflowService->transitionStatus(
+                model: $pengabdian,
+                targetStatus: 'lolos',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.pengabdian.index')
-                ->with('success', 'Pengabdian berhasil disetujui.');
+                ->with('success', $this->workflowService->getSuccessMessage('lolos', 'Pengabdian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
      * Set status to revisi_pra_final
+     * 
+     * @param Request $request
+     * @param Pengabdian $pengabdian
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function setRevisiPraFinal(Request $request, Pengabdian $pengabdian)
     {
         try {
-            if (!$pengabdian->canTransitionTo('revisi_pra_final')) {
-                throw new InvalidStatusTransitionException($pengabdian->status, 'revisi_pra_final');
-            }
-
+            // Validate catatan required untuk feedback revisi pra-final
             $request->validate([
                 'catatan' => 'required|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $pengabdian->status;
-            
-            $pengabdian->update([
-                'status' => 'revisi_pra_final',
-                'catatan_verifikasi' => $request->catatan
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Pengabdian::class,
-                'statusable_id' => $pengabdian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'revisi_pra_final',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => $request->catatan
-            ]);
-
-            DB::commit();
+            // Use service untuk handle status transition
+            $this->workflowService->transitionStatus(
+                model: $pengabdian,
+                targetStatus: 'revisi_pra_final',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.pengabdian.index')
-                ->with('success', 'Pengabdian diminta revisi pra-final.');
+                ->with('success', $this->workflowService->getSuccessMessage('revisi_pra_final', 'Pengabdian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
     /**
      * Set status to selesai
+     * 
+     * @param Request $request
+     * @param Pengabdian $pengabdian
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function setSelesai(Request $request, Pengabdian $pengabdian)
     {
         try {
-            if (!$pengabdian->canTransitionTo('selesai')) {
-                throw new InvalidStatusTransitionException($pengabdian->status, 'selesai');
-            }
-
+            // Validate catatan optional untuk completion
             $request->validate([
                 'catatan' => 'nullable|string|max:500'
             ]);
 
-            DB::beginTransaction();
-
-            $oldStatus = $pengabdian->status;
-            
-            $pengabdian->update([
-                'status' => 'selesai',
-                'catatan_verifikasi' => 'Pengabdian selesai'
-            ]);
-
-            StatusHistory::create([
-                'statusable_type' => Pengabdian::class,
-                'statusable_id' => $pengabdian->id,
-                'old_status' => $oldStatus,
-                'new_status' => 'selesai',
-                'changed_by_user_id' => Auth::id(),
-                'notes' => 'Pengabdian selesai'
-            ]);
-
-            DB::commit();
+            // Use service untuk handle status transition
+            $this->workflowService->transitionStatus(
+                model: $pengabdian,
+                targetStatus: 'selesai',
+                notes: $request->catatan
+            );
 
             return redirect()->route('admin.pengabdian.index')
-                ->with('success', 'Pengabdian berhasil diselesaikan.');
+                ->with('success', $this->workflowService->getSuccessMessage('selesai', 'Pengabdian'));
 
         } catch (WorkflowException $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
@@ -320,6 +270,10 @@ class AdminPengabdianController extends Controller
     /**
      * Update catatan verifikasi without changing status
      * Untuk memberikan feedback tambahan pada status revisi
+     * 
+     * @param Request $request
+     * @param Pengabdian $pengabdian
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function updateCatatanVerifikasi(Request $request, Pengabdian $pengabdian)
     {
@@ -333,27 +287,11 @@ class AdminPengabdianController extends Controller
                 'catatan_verifikasi.max' => 'Catatan verifikasi maksimal 500 karakter.'
             ]);
 
-            DB::beginTransaction();
-
-            $oldCatatan = $pengabdian->catatan_verifikasi;
-            
-            $pengabdian->update([
-                'catatan_verifikasi' => $request->catatan_verifikasi
-            ]);
-
-            // Log for audit trail
-            Log::info('Catatan verifikasi updated', [
-                'admin_id' => Auth::id(),
-                'admin_name' => Auth::user()->name,
-                'pengabdian_id' => $pengabdian->id,
-                'pengabdian_judul' => $pengabdian->judul,
-                'status' => $pengabdian->status,
-                'old_catatan' => $oldCatatan,
-                'new_catatan' => $request->catatan_verifikasi,
-                'timestamp' => now()
-            ]);
-
-            DB::commit();
+            // Use service untuk update notes tanpa change status
+            $this->workflowService->updateNotes(
+                model: $pengabdian,
+                notes: $request->catatan_verifikasi
+            );
 
             return redirect()->back()
                 ->with('success', 'Catatan verifikasi berhasil diperbarui.');
@@ -361,7 +299,6 @@ class AdminPengabdianController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            DB::rollBack();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }

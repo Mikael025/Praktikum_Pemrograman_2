@@ -1,0 +1,134 @@
+graph TB
+    %% Actor
+    Guest([Guest/Pengunjung])
+
+    %% Use Cases - Homepage
+    ViewPublicHomepage[View Public Homepage]
+    ViewHeroSection[View Hero Section with Tagline]
+    ViewPublicStatistics[View Public Statistics]
+    ViewTotalPenelitian[View Total Penelitian Aktif & Selesai]
+    ViewTotalPengabdian[View Total Pengabdian Aktif & Selesai]
+    ViewFeaturedNews[View Featured 3 Latest News]
+    ClickCTALogin[Click CTA Login Portal]
+    ClickCTAWhatsApp[Click CTA Contact WhatsApp]
+
+    %% Use Cases - Visi Misi
+    ViewVisiMisiPage[View Visi Misi LPPM Page]
+    ReadVisiMisiContent[Read Visi Misi Content]
+
+    %% Use Cases - Public News
+    ViewPublicNewsList[View Public News List]
+    FilterPublicNewsByCategory[Filter Public News by Category]
+    ViewPublicNewsDetail[View Public News Detail]
+    ReadPublicNewsContent[Read Public News Full Content with Image]
+
+    %% Use Cases - Downloads
+    ViewDownloadsPage[View Downloads Page]
+    FilterDownloadsByCategory[Filter Downloads by Category]
+    FilterDownloadsByYear[Filter Downloads by Year]
+    ViewDownloadStatistics[View Download Statistics]
+    ViewTotalDocumentsPenelitian[View Total Documents Penelitian]
+    ViewTotalDocumentsPengabdian[View Total Documents Pengabdian]
+    DownloadLaporanAkhir[Download Laporan Akhir Selesai]
+    DownloadPDFDocument[Download PDF Document]
+
+    %% Guest Connections - Homepage
+    Guest --> ViewPublicHomepage
+    Guest --> ViewHeroSection
+    Guest --> ViewPublicStatistics
+    Guest --> ViewTotalPenelitian
+    Guest --> ViewTotalPengabdian
+    Guest --> ViewFeaturedNews
+    Guest --> ClickCTALogin
+    Guest --> ClickCTAWhatsApp
+
+    %% Guest Connections - Visi Misi
+    Guest --> ViewVisiMisiPage
+    Guest --> ReadVisiMisiContent
+
+    %% Guest Connections - Public News
+    Guest --> ViewPublicNewsList
+    Guest --> FilterPublicNewsByCategory
+    Guest --> ViewPublicNewsDetail
+    Guest --> ReadPublicNewsContent
+
+    %% Guest Connections - Downloads
+    Guest --> ViewDownloadsPage
+    Guest --> FilterDownloadsByCategory
+    Guest --> FilterDownloadsByYear
+    Guest --> ViewDownloadStatistics
+    Guest --> ViewTotalDocumentsPenelitian
+    Guest --> ViewTotalDocumentsPengabdian
+    Guest --> DownloadLaporanAkhir
+    Guest --> DownloadPDFDocument
+
+    %% Supporting Use Cases for Include
+    FetchPublicStatistics[Fetch Public Statistics]
+    CountActiveActivities[Count Active Activities]
+    CountCompletedActivities[Count Completed Activities]
+    FetchPublicNews[Fetch Public News]
+    ApplyPublicNewsFilter[Apply Public News Filter]
+    LoadNewsContent[Load News Content]
+    FetchFinishedDocuments[Fetch Finished Documents]
+    ApplyDownloadFilter[Apply Download Filter]
+    ValidateDocumentAccess[Validate Document Access]
+    TrackDownloadStatistics[Track Download Statistics]
+    FetchDocumentFile[Fetch Document File]
+
+    %% Supporting Use Cases for Extend
+    SearchNews[Search News by Keyword]
+    ShareNewsOnSocialMedia[Share News on Social Media]
+    SubscribeToNewsletter[Subscribe to Newsletter]
+    ContactLPPMViaForm[Contact LPPM via Form]
+    ViewActivityMap[View Activity Location Map]
+    PreviewDocumentBeforeDownload[Preview Document Before Download]
+    RateDocument[Rate Document Quality]
+
+    %% Include Relationships - Homepage
+    ViewPublicHomepage -.->|include| FetchPublicStatistics
+    ViewPublicStatistics -.->|include| CountActiveActivities
+    ViewPublicStatistics -.->|include| CountCompletedActivities
+    ViewFeaturedNews -.->|include| FetchPublicNews
+
+    %% Include Relationships - News
+    ViewPublicNewsList -.->|include| FetchPublicNews
+    FilterPublicNewsByCategory -.->|include| ApplyPublicNewsFilter
+    ViewPublicNewsDetail -.->|include| LoadNewsContent
+
+    %% Include Relationships - Downloads
+    ViewDownloadsPage -.->|include| FetchFinishedDocuments
+    FilterDownloadsByCategory -.->|include| ApplyDownloadFilter
+    FilterDownloadsByYear -.->|include| ApplyDownloadFilter
+    ViewDownloadStatistics -.->|include| TrackDownloadStatistics
+    DownloadLaporanAkhir -.->|include| ValidateDocumentAccess
+    DownloadLaporanAkhir -.->|include| FetchDocumentFile
+    DownloadPDFDocument -.->|include| FetchDocumentFile
+
+    %% Extend Relationships
+    SearchNews -.->|extend| ViewPublicNewsList
+    ShareNewsOnSocialMedia -.->|extend| ViewPublicNewsDetail
+    SubscribeToNewsletter -.->|extend| ViewPublicHomepage
+    ContactLPPMViaForm -.->|extend| ViewPublicHomepage
+    ViewActivityMap -.->|extend| ViewDownloadsPage
+    PreviewDocumentBeforeDownload -.->|extend| DownloadLaporanAkhir
+    RateDocument -.->|extend| DownloadLaporanAkhir
+
+    style Guest fill:#95e1d3
+    style FetchPublicStatistics fill:#ffeaa7
+    style CountActiveActivities fill:#ffeaa7
+    style CountCompletedActivities fill:#ffeaa7
+    style FetchPublicNews fill:#ffeaa7
+    style ApplyPublicNewsFilter fill:#ffeaa7
+    style LoadNewsContent fill:#ffeaa7
+    style FetchFinishedDocuments fill:#ffeaa7
+    style ApplyDownloadFilter fill:#ffeaa7
+    style ValidateDocumentAccess fill:#ffeaa7
+    style TrackDownloadStatistics fill:#ffeaa7
+    style FetchDocumentFile fill:#ffeaa7
+    style SearchNews fill:#dfe6e9
+    style ShareNewsOnSocialMedia fill:#dfe6e9
+    style SubscribeToNewsletter fill:#dfe6e9
+    style ContactLPPMViaForm fill:#dfe6e9
+    style ViewActivityMap fill:#dfe6e9
+    style PreviewDocumentBeforeDownload fill:#dfe6e9
+    style RateDocument fill:#dfe6e9

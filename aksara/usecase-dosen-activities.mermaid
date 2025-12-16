@@ -1,0 +1,166 @@
+graph TB
+    %% Actor
+    Dosen([Dosen])
+
+    %% Use Cases - Dashboard
+    ViewDosenDashboard[View Dosen Dashboard]
+    ViewPersonalStatistics[View Personal Statistics]
+    ViewActionRequired[View Action Required Widget]
+    ViewPendingVerification[View Pending Verification Alert]
+    ViewRecentActivity[View Recent Personal Activity]
+    ViewEnhancedStats[View Enhanced Personal Stats]
+
+    %% Use Cases - Penelitian Management
+    CreatePenelitian[Create Penelitian]
+    UploadProposalPenelitian[Upload Proposal Penelitian Wajib]
+    ViewOwnPenelitian[View Own Penelitian List]
+    FilterOwnPenelitian[Filter Own Penelitian]
+    ViewPenelitianDetail[View Penelitian Detail]
+    EditPenelitianConditional[Edit Penelitian Conditional]
+    DeletePenelitianConditional[Delete Penelitian Only Diusulkan]
+    UploadLaporanAkhirPenelitian[Upload Laporan Akhir Penelitian]
+    UploadSupportingDocPenelitian[Upload Supporting Documents Penelitian]
+    ReuploadDocumentsPenelitian[Re-upload Documents Penelitian]
+    DeleteDocumentsPenelitian[Delete Documents Penelitian]
+    ViewVerificationNotesPenelitian[View Verification Notes Penelitian]
+    ViewStatusHistoryPenelitian[View Status History Penelitian]
+
+    %% Use Cases - Pengabdian Management
+    CreatePengabdian[Create Pengabdian]
+    UploadProposalPengabdian[Upload Proposal Pengabdian Wajib]
+    ViewOwnPengabdian[View Own Pengabdian List]
+    FilterOwnPengabdian[Filter Own Pengabdian]
+    ViewPengabdianDetail[View Pengabdian Detail]
+    EditPengabdianConditional[Edit Pengabdian Conditional]
+    DeletePengabdianConditional[Delete Pengabdian Only Diusulkan]
+    UploadLaporanAkhirPengabdian[Upload Laporan Akhir Pengabdian]
+    UploadSupportingDocPengabdian[Upload Supporting Documents Pengabdian]
+    ReuploadDocumentsPengabdian[Re-upload Documents Pengabdian]
+    DeleteDocumentsPengabdian[Delete Documents Pengabdian]
+    ViewVerificationNotesPengabdian[View Verification Notes Pengabdian]
+    ViewStatusHistoryPengabdian[View Status History Pengabdian]
+
+    %% Dosen Connections - Dashboard
+    Dosen --> ViewDosenDashboard
+    Dosen --> ViewPersonalStatistics
+    Dosen --> ViewActionRequired
+    Dosen --> ViewPendingVerification
+    Dosen --> ViewRecentActivity
+    Dosen --> ViewEnhancedStats
+
+    %% Dosen Connections - Penelitian
+    Dosen --> CreatePenelitian
+    Dosen --> UploadProposalPenelitian
+    Dosen --> ViewOwnPenelitian
+    Dosen --> FilterOwnPenelitian
+    Dosen --> ViewPenelitianDetail
+    Dosen --> EditPenelitianConditional
+    Dosen --> DeletePenelitianConditional
+    Dosen --> UploadLaporanAkhirPenelitian
+    Dosen --> UploadSupportingDocPenelitian
+    Dosen --> ReuploadDocumentsPenelitian
+    Dosen --> DeleteDocumentsPenelitian
+    Dosen --> ViewVerificationNotesPenelitian
+    Dosen --> ViewStatusHistoryPenelitian
+
+    %% Dosen Connections - Pengabdian
+    Dosen --> CreatePengabdian
+    Dosen --> UploadProposalPengabdian
+    Dosen --> ViewOwnPengabdian
+    Dosen --> FilterOwnPengabdian
+    Dosen --> ViewPengabdianDetail
+    Dosen --> EditPengabdianConditional
+    Dosen --> DeletePengabdianConditional
+    Dosen --> UploadLaporanAkhirPengabdian
+    Dosen --> UploadSupportingDocPengabdian
+    Dosen --> ReuploadDocumentsPengabdian
+    Dosen --> DeleteDocumentsPengabdian
+    Dosen --> ViewVerificationNotesPengabdian
+    Dosen --> ViewStatusHistoryPengabdian
+
+    %% Supporting Use Cases for Include
+    ValidateActivityInput[Validate Activity Input]
+    ValidateFileUpload[Validate File Upload]
+    SaveActivityToDatabase[Save Activity to Database]
+    UploadFileToStorage[Upload File to Storage]
+    CheckEditPermission[Check Edit Permission Based on Status]
+    CheckDeletePermission[Check Delete Permission Based on Status]
+    DeleteFileFromStorage[Delete File from Storage]
+    CreateDocumentVersion[Create Document Version]
+    FetchStatusHistory[Fetch Status History]
+    FetchVerificationNotes[Fetch Verification Notes]
+    GeneratePersonalStatistics[Generate Personal Statistics]
+
+    %% Supporting Use Cases for Extend
+    AddTeamMembers[Add Team Members]
+    SetFundingSource[Set Funding Source]
+    SetPartnerOrganization[Set Partner Organization]
+    SendSubmissionNotification[Send Submission Notification]
+    RequestVerification[Request Verification]
+    DownloadAllDocuments[Download All Documents as ZIP]
+
+    %% Include Relationships - Penelitian
+    CreatePenelitian -.->|include| ValidateActivityInput
+    CreatePenelitian -.->|include| SaveActivityToDatabase
+    UploadProposalPenelitian -.->|include| ValidateFileUpload
+    UploadProposalPenelitian -.->|include| UploadFileToStorage
+    EditPenelitianConditional -.->|include| CheckEditPermission
+    EditPenelitianConditional -.->|include| ValidateActivityInput
+    DeletePenelitianConditional -.->|include| CheckDeletePermission
+    DeletePenelitianConditional -.->|include| DeleteFileFromStorage
+    UploadLaporanAkhirPenelitian -.->|include| ValidateFileUpload
+    UploadLaporanAkhirPenelitian -.->|include| UploadFileToStorage
+    ReuploadDocumentsPenelitian -.->|include| ValidateFileUpload
+    ReuploadDocumentsPenelitian -.->|include| CreateDocumentVersion
+    DeleteDocumentsPenelitian -.->|include| DeleteFileFromStorage
+    ViewVerificationNotesPenelitian -.->|include| FetchVerificationNotes
+    ViewStatusHistoryPenelitian -.->|include| FetchStatusHistory
+    ViewDosenDashboard -.->|include| GeneratePersonalStatistics
+
+    %% Include Relationships - Pengabdian
+    CreatePengabdian -.->|include| ValidateActivityInput
+    CreatePengabdian -.->|include| SaveActivityToDatabase
+    UploadProposalPengabdian -.->|include| ValidateFileUpload
+    UploadProposalPengabdian -.->|include| UploadFileToStorage
+    EditPengabdianConditional -.->|include| CheckEditPermission
+    EditPengabdianConditional -.->|include| ValidateActivityInput
+    DeletePengabdianConditional -.->|include| CheckDeletePermission
+    DeletePengabdianConditional -.->|include| DeleteFileFromStorage
+    UploadLaporanAkhirPengabdian -.->|include| ValidateFileUpload
+    UploadLaporanAkhirPengabdian -.->|include| UploadFileToStorage
+    ReuploadDocumentsPengabdian -.->|include| ValidateFileUpload
+    ReuploadDocumentsPengabdian -.->|include| CreateDocumentVersion
+    DeleteDocumentsPengabdian -.->|include| DeleteFileFromStorage
+    ViewVerificationNotesPengabdian -.->|include| FetchVerificationNotes
+    ViewStatusHistoryPengabdian -.->|include| FetchStatusHistory
+
+    %% Extend Relationships
+    AddTeamMembers -.->|extend| CreatePenelitian
+    AddTeamMembers -.->|extend| CreatePengabdian
+    SetFundingSource -.->|extend| CreatePenelitian
+    SetPartnerOrganization -.->|extend| CreatePengabdian
+    SendSubmissionNotification -.->|extend| CreatePenelitian
+    SendSubmissionNotification -.->|extend| CreatePengabdian
+    RequestVerification -.->|extend| UploadProposalPenelitian
+    RequestVerification -.->|extend| UploadLaporanAkhirPenelitian
+    DownloadAllDocuments -.->|extend| ViewPenelitianDetail
+    DownloadAllDocuments -.->|extend| ViewPengabdianDetail
+
+    style Dosen fill:#4ecdc4
+    style ValidateActivityInput fill:#ffeaa7
+    style ValidateFileUpload fill:#ffeaa7
+    style SaveActivityToDatabase fill:#ffeaa7
+    style UploadFileToStorage fill:#ffeaa7
+    style CheckEditPermission fill:#ffeaa7
+    style CheckDeletePermission fill:#ffeaa7
+    style DeleteFileFromStorage fill:#ffeaa7
+    style CreateDocumentVersion fill:#ffeaa7
+    style FetchStatusHistory fill:#ffeaa7
+    style FetchVerificationNotes fill:#ffeaa7
+    style GeneratePersonalStatistics fill:#ffeaa7
+    style AddTeamMembers fill:#dfe6e9
+    style SetFundingSource fill:#dfe6e9
+    style SetPartnerOrganization fill:#dfe6e9
+    style SendSubmissionNotification fill:#dfe6e9
+    style RequestVerification fill:#dfe6e9
+    style DownloadAllDocuments fill:#dfe6e9

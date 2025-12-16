@@ -1,0 +1,105 @@
+graph TB
+    %% Actor
+    Dosen([Dosen])
+
+    %% Use Cases - Informasi/Berita
+    ViewDosenVisibleNews[View Dosen-Visible News]
+    FilterNewsByCategory[Filter News by Category]
+    ViewNewsDetail[View News Detail]
+    ReadFullNewsContent[Read Full News Content with Image]
+
+    %% Use Cases - Personal Reporting
+    GeneratePersonalReport[Generate Personal Report]
+    FilterPersonalReportByYear[Filter Personal Report by Year]
+    FilterPersonalReportByStatus[Filter Personal Report by Status]
+    ViewPersonalReportStatistics[View Personal Report Statistics]
+    ViewTotalActivities[View Total Personal Activities]
+    ViewSuccessRate[View Personal Success Rate]
+    ExportPersonalReportPDF[Export Personal Report to PDF]
+    ExportPersonalReportCSV[Export Personal Report to CSV]
+    GeneratePersonalComparison[Generate Personal Comparison Report]
+    ViewPersonalChartVisualization[View Personal Chart Visualization]
+
+    %% Dosen Connections - Informasi
+    Dosen --> ViewDosenVisibleNews
+    Dosen --> FilterNewsByCategory
+    Dosen --> ViewNewsDetail
+    Dosen --> ReadFullNewsContent
+
+    %% Dosen Connections - Personal Reporting
+    Dosen --> GeneratePersonalReport
+    Dosen --> FilterPersonalReportByYear
+    Dosen --> FilterPersonalReportByStatus
+    Dosen --> ViewPersonalReportStatistics
+    Dosen --> ViewTotalActivities
+    Dosen --> ViewSuccessRate
+    Dosen --> ExportPersonalReportPDF
+    Dosen --> ExportPersonalReportCSV
+    Dosen --> GeneratePersonalComparison
+    Dosen --> ViewPersonalChartVisualization
+
+    %% Supporting Use Cases for Include
+    FetchPersonalActivityData[Fetch Personal Activity Data]
+    CalculatePersonalStatistics[Calculate Personal Statistics]
+    FormatPersonalReportData[Format Personal Report Data]
+    ValidateFilterParameters[Validate Filter Parameters]
+    GeneratePersonalPDF[Generate Personal PDF]
+    GeneratePersonalCSV[Generate Personal CSV]
+    RenderPersonalChart[Render Personal Chart]
+    FetchNewsData[Fetch News Data]
+    ApplyNewsFilter[Apply News Filter]
+
+    %% Supporting Use Cases for Extend
+    CompareWithPeers[Compare with Other Lecturers]
+    SetReportTemplate[Set Report Template]
+    PrintPersonalReport[Print Personal Report]
+    ShareReportViaEmail[Share Report via Email]
+    SaveReportToFavorites[Save Report to Favorites]
+    ExportChartAsImage[Export Chart as Image]
+
+    %% Include Relationships - Informasi
+    ViewDosenVisibleNews -.->|include| FetchNewsData
+    FilterNewsByCategory -.->|include| ApplyNewsFilter
+
+    %% Include Relationships - Personal Reporting
+    GeneratePersonalReport -.->|include| FetchPersonalActivityData
+    GeneratePersonalReport -.->|include| CalculatePersonalStatistics
+    GeneratePersonalReport -.->|include| FormatPersonalReportData
+    FilterPersonalReportByYear -.->|include| ValidateFilterParameters
+    FilterPersonalReportByYear -.->|include| FetchPersonalActivityData
+    FilterPersonalReportByStatus -.->|include| ValidateFilterParameters
+    FilterPersonalReportByStatus -.->|include| FetchPersonalActivityData
+    ViewPersonalReportStatistics -.->|include| CalculatePersonalStatistics
+    ExportPersonalReportPDF -.->|include| FormatPersonalReportData
+    ExportPersonalReportPDF -.->|include| GeneratePersonalPDF
+    ExportPersonalReportCSV -.->|include| FormatPersonalReportData
+    ExportPersonalReportCSV -.->|include| GeneratePersonalCSV
+    GeneratePersonalComparison -.->|include| FetchPersonalActivityData
+    GeneratePersonalComparison -.->|include| CalculatePersonalStatistics
+    ViewPersonalChartVisualization -.->|include| RenderPersonalChart
+
+    %% Extend Relationships
+    CompareWithPeers -.->|extend| GeneratePersonalReport
+    SetReportTemplate -.->|extend| ExportPersonalReportPDF
+    PrintPersonalReport -.->|extend| ExportPersonalReportPDF
+    ShareReportViaEmail -.->|extend| ExportPersonalReportPDF
+    ShareReportViaEmail -.->|extend| ExportPersonalReportCSV
+    SaveReportToFavorites -.->|extend| GeneratePersonalReport
+    ExportChartAsImage -.->|extend| ViewPersonalChartVisualization
+
+    style Dosen fill:#4ecdc4
+    style FetchPersonalActivityData fill:#ffeaa7
+    style CalculatePersonalStatistics fill:#ffeaa7
+    style FormatPersonalReportData fill:#ffeaa7
+    style ValidateFilterParameters fill:#ffeaa7
+    style GeneratePersonalPDF fill:#ffeaa7
+    style GeneratePersonalCSV fill:#ffeaa7
+    style RenderPersonalChart fill:#ffeaa7
+    style FetchNewsData fill:#ffeaa7
+    style ApplyNewsFilter fill:#ffeaa7
+    style CompareWithPeers fill:#dfe6e9
+    style SetReportTemplate fill:#dfe6e9
+    style PrintPersonalReport fill:#dfe6e9
+    style ShareReportViaEmail fill:#dfe6e9
+    style SaveReportToFavorites fill:#dfe6e9
+    style ExportChartAsImage fill:#dfe6e9

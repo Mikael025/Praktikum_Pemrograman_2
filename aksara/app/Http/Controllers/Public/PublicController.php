@@ -1,6 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Public;
 
+use App\Http\Controllers\Controller;
 use App\Models\Informasi;
 use App\Models\Penelitian;
 use App\Models\Pengabdian;
@@ -10,10 +11,18 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Controller untuk halaman publik yang dapat diakses tanpa autentikasi
+ * 
+ * Menyediakan fitur browsing informasi, berita, penelitian, dan pengabdian
+ * yang sudah selesai untuk masyarakat umum.
+ */
 class PublicController extends Controller
 {
     /**
-     * Show the public home page with featured informasi/berita
+     * Menampilkan halaman home publik dengan featured berita dan statistik
+     * 
+     * @return View View homepage dengan berita terbaru dan total kegiatan
      */
     public function home(): View
     {
@@ -56,7 +65,10 @@ class PublicController extends Controller
     }
 
     /**
-     * Show news by category (umum, penelitian, pengabdian, semua)
+     * Menampilkan berita berdasarkan kategori dengan pagination
+     * 
+     * @param string $category Kategori berita: 'umum', 'penelitian', 'pengabdian', atau 'semua'
+     * @return View View daftar berita berdasarkan kategori
      */
     public function newsByCategory(string $category): View
     {
@@ -88,7 +100,12 @@ class PublicController extends Controller
     }
 
     /**
-     * Show detail berita/informasi for public
+     * Menampilkan detail artikel berita berdasarkan slug
+     * 
+     * @param string $category Kategori berita untuk validasi dan breadcrumb
+     * @param string $slug Slug unik artikel
+     * @return View View detail artikel
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException Jika kategori invalid atau artikel tidak ditemukan
      */
     public function newsDetail(string $category, string $slug): View
     {
@@ -199,7 +216,13 @@ class PublicController extends Controller
     }
 
     /**
-     * Download a specific final report document
+     * Download dokumen laporan akhir penelitian atau pengabdian
+     * 
+     * @param Request $request HTTP request
+     * @param string $type Tipe dokumen: 'penelitian' atau 'pengabdian'
+     * @param int $id ID dokumen yang akan didownload
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse Download response
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException Jika tipe invalid atau dokumen tidak ditemukan
      */
     public function downloadDocument(Request $request, string $type, int $id)
     {
