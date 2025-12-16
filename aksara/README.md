@@ -206,16 +206,6 @@ See [database-erd.mermaid](database-erd.mermaid) untuk ER diagram lengkap.
 - **Accessibility**: WCAG 2.1 Level AA compliance
 - **Documentation**: [UI-UX-Documentation.md](UI-UX-Documentation.md)
 
-## Code Quality
-
-Current scores from [Code-Quality-Analysis.txt](Code-Quality-Analysis.txt):
-
-- **Overall**: 78/100
-- **Structure**: 75/100
-- **Maintainability**: 80/100
-- **Documentation**: 65/100
-- **Security**: 90/100
-
 ## Security Features
 
 - ✅ CSRF Protection
