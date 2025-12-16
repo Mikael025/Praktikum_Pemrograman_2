@@ -129,10 +129,24 @@ Aplikasi akan berjalan di `http://localhost:8000`
 aksara/
 ├── app/
 │   ├── Http/Controllers/
-│   │   ├── Admin*Controller.php       # Admin controllers
-│   │   ├── Dosen*Controller.php       # Dosen controllers
-│   │   └── Public*Controller.php      # Public controllers
+│   │   ├── Admin/                     # Admin controllers
+│   │   │   ├── DashboardController.php
+│   │   │   ├── LaporanController.php
+│   │   │   └── VerifikasiController.php
+│   │   ├── Dosen/                     # Dosen controllers
+│   │   │   ├── DashboardController.php
+│   │   │   ├── PenelitianController.php
+│   │   │   ├── PengabdianController.php
+│   │   │   └── LaporanController.php
+│   │   └── Public/                    # Public controllers
+│   │       └── InformasiController.php
 │   ├── Models/                         # Eloquent models
+│   │   ├── User.php
+│   │   ├── LecturerProfile.php
+│   │   ├── Penelitian.php
+│   │   ├── Pengabdian.php
+│   │   ├── StatusHistory.php
+│   │   └── DocumentVersion.php
 │   ├── Services/                       # Business logic layer
 │   │   ├── StatusWorkflowService.php  # Workflow management
 │   │   ├── DocumentService.php        # Document handling
@@ -144,60 +158,99 @@ aksara/
 │   └── seeders/                       # Database seeders
 ├── resources/
 │   ├── views/                         # Blade templates
+│   │   ├── admin/                     # Admin views
+│   │   ├── dosen/                     # Dosen views
+│   │   └── public/                    # Public views
 │   ├── css/                           # Stylesheets
 │   └── js/                            # JavaScript files
 ├── routes/
 │   ├── web.php                        # Web routes
 │   └── auth.php                       # Authentication routes
-└── tests/                             # Pest tests
+├── tests/                             # Testing
+│   └── Feature/
+│       └── DatabaseVerificationTest.php  # Database tests (17 test cases)
+└── DOKUMENTASI-PENGUJIAN-DATABASE.md  # Testing documentation
 ```
 
 ## Workflow Status
 
-Sistem menggunakan 5 tahapan status verifikasi:
+Sistem menggunakan 6 tahapan status verifikasi:
 
 ```
-diajukan → tidak_lolos (REJECTED)
-        ↓
-        → lolos_perlu_revisi → revisi_pra_final → selesai
-        ↓
-        → lolos → selesai
+diusulkan → tidak_lolos (REJECTED)
+          ↓
+          → lolos_perlu_revisi → revisi_pra_final → selesai
+          ↓
+          → lolos → selesai
 ```
 
 **Status Flow**:
-1. **diajukan** - Submission awal oleh dosen
+1. **diusulkan** - Submission awal oleh dosen
 2. **tidak_lolos** - Ditolak admin (terminal state)
 3. **lolos_perlu_revisi** - Diterima dengan revisi minor
-4. **lolos** - Diterima tanpa revisi
+4. **lolos** - Diterima tanpa revisi (fast track)
 5. **revisi_pra_final** - Tahap revisi akhir (dari lolos_perlu_revisi)
 6. **selesai** - Selesai dan dapat dipublikasi
 
+> **Note**: Status ini berlaku untuk penelitian dan pengabdian dengan ENUM constraint validation.
+
 ## Testing
+
+### Database Verification Tests
+
+Sistem memiliki comprehensive database testing dengan 17 test cases:
 
 ```bash
 # Run all tests
 php artisan test
 
-# Run specific test
-php artisan test --filter StatusWorkflowServiceTest
+# Run database verification tests
+php artisan test --filter DatabaseVerificationTest
+
+# Run specific test group
+php artisan test --filter="test_enum_constraint|test_foreign_key"
 
 # Run with coverage
 php artisan test --coverage
 ```
 
+**Test Coverage**:
+- ✅ 17 test cases (100% passed)
+- ✅ 66 assertions verified
+- ✅ Struktur tabel (9 tables)
+- ✅ Constraints (ENUM, UNIQUE, NOT NULL, Foreign Key)
+- ✅ Relasi (One-to-One, One-to-Many, Polymorphic)
+- ✅ CRUD operations & JSON field handling
+- ✅ Document versioning
+
+📄 **Dokumentasi Lengkap**: Lihat [DOKUMENTASI-PENGUJIAN-DATABASE.md](DOKUMENTASI-PENGUJIAN-DATABASE.md) untuk detail output setiap test.
+
 ## Database Schema
 
-Key tables:
-- `users` - User authentication (admin, dosen)
-- `lecturer_profiles` - Profil dosen (NIDN, Scopus ID, dll)
-- `penelitian` - Data penelitian
-- `pengabdian` - Data pengabdian
-- `penelitian_documents` - Dokumen penelitian
-- `pengabdian_documents` - Dokumen pengabdian
-- `status_histories` - History perubahan status
-- `document_versions` - Versioning dokumen
+### Key Tables (9 tables verified)
 
-See [database-erd.mermaid](database-erd.mermaid) untuk ER diagram lengkap.
+- `users` - User authentication (admin, dosen, pimpinan)
+- `lecturer_profiles` - Profil dosen (NIP, affiliation, citizenship)
+- `penelitian` - Data penelitian dengan status workflow
+- `pengabdian` - Data pengabdian dengan lokasi & mitra
+- `penelitian_documents` - Dokumen penelitian (proposal, laporan_kemajuan, laporan_akhir)
+- `pengabdian_documents` - Dokumen pengabdian (proposal, laporan_akhir)
+- `status_history` - History perubahan status (polymorphic)
+- `document_versions` - Versioning dokumen multi-type
+- `informasi` - Konten informasi publik
+
+### Constraints Implemented
+
+- **ENUM**: `users.role` (admin/dosen/pimpinan), `status` (6 values)
+- **UNIQUE**: `users.email`, `lecturer_profiles.nip`
+- **Foreign Keys**: Cascade delete untuk integritas referensial
+- **NOT NULL**: Field wajib tervalidasi
+- **JSON Support**: `tim_peneliti`, `tim_pelaksana` (string atau JSON array)
+
+### Documentation
+
+- 📊 [DOKUMENTASI-PENGUJIAN-DATABASE.md](DOKUMENTASI-PENGUJIAN-DATABASE.md) - Test results & verification
+- 📐 [database-erd.mermaid](database-erd.mermaid) - ER diagram lengkap (if available)
 
 ## UI/UX Design
 
