@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 /**
  * Controller untuk dashboard admin
- * 
+ *
  * Menampilkan statistik penelitian dan pengabdian, grafik tren bulanan,
  * top researchers, dan submission heatmap untuk monitoring kegiatan dosen.
  */
@@ -18,15 +18,19 @@ class DashboardController extends Controller
 {
     /**
      * Menampilkan halaman dashboard admin dengan statistik lengkap
-     * 
-     * @param Request $request HTTP request dengan optional parameter 'year' untuk filter tahun
+     *
+     * TODO: Implement caching untuk statistik dashboard (TTL 1 hour)
+     *       Cache::remember('admin.dashboard.stats.'.$year, 3600, function() { ... })
+     *       untuk meningkatkan performance
+     *
+     * @param  Request  $request  HTTP request dengan optional parameter 'year' untuk filter tahun
      * @return \Illuminate\View\View View dashboard dengan data statistik
      */
     public function index(Request $request)
     {
         try {
             $year = $request->get('year', date('Y'));
-            
+
             // Statistik Penelitian - dengan status baru
             $penelitianStats = [
                 'diusulkan' => 0,
@@ -34,7 +38,7 @@ class DashboardController extends Controller
                 'lolos' => 0,
                 'selesai' => 0,
             ];
-            
+
             try {
                 $penelitianQuery = $year ? Penelitian::where('tahun', $year) : Penelitian::query();
                 $penelitianStats = [
@@ -46,7 +50,7 @@ class DashboardController extends Controller
             } catch (\Exception $e) {
                 // Jika tabel belum ada, gunakan nilai default
             }
-            
+
             // Statistik Pengabdian - dengan status baru
             $pengabdianStats = [
                 'diusulkan' => 0,
@@ -54,7 +58,7 @@ class DashboardController extends Controller
                 'lolos' => 0,
                 'selesai' => 0,
             ];
-            
+
             try {
                 $pengabdianQuery = $year ? Pengabdian::where('tahun', $year) : Pengabdian::query();
                 $pengabdianStats = [
@@ -66,7 +70,7 @@ class DashboardController extends Controller
             } catch (\Exception $e) {
                 // Jika tabel belum ada, gunakan nilai default
             }
-            
+
             // VERIFICATION QUEUE - Items awaiting verification
             $verificationQueue = collect()
                 ->merge(
@@ -74,7 +78,7 @@ class DashboardController extends Controller
                         ->with('user')
                         ->latest('created_at')
                         ->get()
-                        ->map(function($item) {
+                        ->map(function ($item) {
                             return [
                                 'id' => $item->id,
                                 'type' => 'penelitian',
@@ -90,7 +94,7 @@ class DashboardController extends Controller
                         ->with('user')
                         ->latest('created_at')
                         ->get()
-                        ->map(function($item) {
+                        ->map(function ($item) {
                             return [
                                 'id' => $item->id,
                                 'type' => 'pengabdian',
@@ -103,16 +107,22 @@ class DashboardController extends Controller
                 )
                 ->sortByDesc('submitted_at')
                 ->values();
-            
-            // ENHANCED SYSTEM OVERVIEW
+
+            // ENHANCED SYSTEM OVERVIEW - Statistik keseluruhan sistem
             $totalPenelitian = Penelitian::count();
             $totalPengabdian = Pengabdian::count();
             $totalDosen = User::where('role', 'dosen')->count();
-            
+
             $enhancedStats = [
                 'total_dosen' => $totalDosen,
                 'total_kegiatan' => $totalPenelitian + $totalPengabdian,
                 'pending_reviews' => $penelitianStats['diusulkan'] + $pengabdianStats['diusulkan'],
+
+                // Perhitungan Success Rate
+                // Success Rate = (Jumlah yang lolos + selesai) / Total kegiatan × 100%
+                // Status yang dihitung "sukses": lolos, revisi_pra_final, selesai
+                // Status yang dihitung "gagal": tidak_lolos
+                // Status pending (diusulkan, lolos_perlu_revisi) tidak termasuk dalam perhitungan
                 'avg_success_rate' => $totalPenelitian + $totalPengabdian > 0
                     ? round((($penelitianStats['lolos'] + $penelitianStats['selesai'] + $pengabdianStats['lolos'] + $pengabdianStats['selesai']) / ($totalPenelitian + $totalPengabdian)) * 100, 1)
                     : 0,
@@ -121,15 +131,15 @@ class DashboardController extends Controller
                 'penelitian_selesai' => $penelitianStats['selesai'],
                 'pengabdian_selesai' => $pengabdianStats['selesai'],
             ];
-            
+
             // ALERTS & WARNINGS
             $alerts = [];
-            
+
             // Items pending > 7 days
-            $oldPending = $verificationQueue->filter(function($item) {
+            $oldPending = $verificationQueue->filter(function ($item) {
                 return $item['days_pending'] > 7;
             })->count();
-            
+
             if ($oldPending > 0) {
                 $alerts[] = [
                     'type' => 'warning',
@@ -137,15 +147,15 @@ class DashboardController extends Controller
                     'action' => 'Segera tinjau untuk menghindari penundaan',
                 ];
             }
-            
+
             // Missing documents
             $missingDocs = Penelitian::where('status', '!=', 'tidak_lolos')
                 ->whereDoesntHave('documents')
                 ->count() +
                 Pengabdian::where('status', '!=', 'tidak_lolos')
-                ->whereDoesntHave('documents')
-                ->count();
-                
+                    ->whereDoesntHave('documents')
+                    ->count();
+
             if ($missingDocs > 0) {
                 $alerts[] = [
                     'type' => 'info',
@@ -153,7 +163,7 @@ class DashboardController extends Controller
                     'action' => 'Hubungi dosen terkait untuk melengkapi dokumen',
                 ];
             }
-            
+
             // RECENT ADMIN ACTIONS (simulated from recent updates)
             $recentActions = collect()
                 ->merge(
@@ -162,7 +172,7 @@ class DashboardController extends Controller
                         ->latest('updated_at')
                         ->take(5)
                         ->get()
-                        ->map(function($item) {
+                        ->map(function ($item) {
                             return [
                                 'type' => 'penelitian',
                                 'action' => $this->getActionFromStatus($item->status),
@@ -179,7 +189,7 @@ class DashboardController extends Controller
                         ->latest('updated_at')
                         ->take(5)
                         ->get()
-                        ->map(function($item) {
+                        ->map(function ($item) {
                             return [
                                 'type' => 'pengabdian',
                                 'action' => $this->getActionFromStatus($item->status),
@@ -193,10 +203,10 @@ class DashboardController extends Controller
                 ->sortByDesc('timestamp')
                 ->take(10)
                 ->values();
-            
+
             return view('dashboard-admin', compact(
-                'penelitianStats', 
-                'pengabdianStats', 
+                'penelitianStats',
+                'pengabdianStats',
                 'year',
                 'verificationQueue',
                 'enhancedStats',
@@ -211,14 +221,14 @@ class DashboardController extends Controller
                 'lolos' => 0,
                 'selesai' => 0,
             ];
-            
+
             $pengabdianStats = [
                 'diusulkan' => 0,
                 'tidak_lolos' => 0,
                 'lolos' => 0,
                 'selesai' => 0,
             ];
-            
+
             $year = date('Y');
             $verificationQueue = collect();
             $enhancedStats = [
@@ -229,10 +239,10 @@ class DashboardController extends Controller
             ];
             $alerts = [];
             $recentActions = collect();
-            
+
             return view('dashboard-admin', compact(
-                'penelitianStats', 
-                'pengabdianStats', 
+                'penelitianStats',
+                'pengabdianStats',
                 'year',
                 'verificationQueue',
                 'enhancedStats',
@@ -241,11 +251,11 @@ class DashboardController extends Controller
             ));
         }
     }
-    
+
     /**
      * API endpoint untuk mendapatkan top 10 peneliti berdasarkan jumlah penelitian dan pengabdian
-     * 
-     * @param Request $request HTTP request dengan optional parameter 'year' untuk filter tahun
+     *
+     * @param  Request  $request  HTTP request dengan optional parameter 'year' untuk filter tahun
      * @return \Illuminate\Http\JsonResponse JSON response berisi array top researchers dengan statistik
      */
     public function topResearchers(Request $request)
@@ -255,26 +265,34 @@ class DashboardController extends Controller
 
         $researchers = User::where('role', 'dosen')
             ->withCount([
-                'penelitian as total_penelitian' => function($query) use ($year) {
-                    if ($year) $query->where('tahun', $year);
+                'penelitian as total_penelitian' => function ($query) use ($year) {
+                    if ($year) {
+                        $query->where('tahun', $year);
+                    }
                 },
-                'penelitian as completed_penelitian' => function($query) use ($year) {
+                'penelitian as completed_penelitian' => function ($query) use ($year) {
                     $query->where('status', 'selesai');
-                    if ($year) $query->where('tahun', $year);
+                    if ($year) {
+                        $query->where('tahun', $year);
+                    }
                 },
-                'pengabdian as total_pengabdian' => function($query) use ($year) {
-                    if ($year) $query->where('tahun', $year);
+                'pengabdian as total_pengabdian' => function ($query) use ($year) {
+                    if ($year) {
+                        $query->where('tahun', $year);
+                    }
                 },
-                'pengabdian as completed_pengabdian' => function($query) use ($year) {
+                'pengabdian as completed_pengabdian' => function ($query) use ($year) {
                     $query->where('status', 'selesai');
-                    if ($year) $query->where('tahun', $year);
+                    if ($year) {
+                        $query->where('tahun', $year);
+                    }
                 },
             ])
             ->get()
-            ->map(function($user) {
+            ->map(function ($user) {
                 $total = $user->total_penelitian + $user->total_pengabdian;
                 $completed = $user->completed_penelitian + $user->completed_pengabdian;
-                
+
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -285,7 +303,7 @@ class DashboardController extends Controller
                     'productivity_score' => ($total * 0.4) + ($completed * 0.6),
                 ];
             })
-            ->filter(function($researcher) {
+            ->filter(function ($researcher) {
                 return $researcher['total_activities'] > 0;
             })
             ->sortByDesc('productivity_score')
@@ -294,14 +312,14 @@ class DashboardController extends Controller
 
         return response()->json($researchers);
     }
-    
+
     /**
      * API endpoint untuk mendapatkan data submission heatmap (pengajuan per tanggal)
-     * 
+     *
      * Menghasilkan data calendar heatmap untuk visualisasi distribusi pengajuan
      * penelitian dan pengabdian sepanjang tahun.
-     * 
-     * @param Request $request HTTP request dengan optional parameter 'year' untuk filter tahun
+     *
+     * @param  Request  $request  HTTP request dengan optional parameter 'year' untuk filter tahun
      * @return \Illuminate\Http\JsonResponse JSON response berisi array tanggal dengan jumlah submissions
      */
     public function submissionHeatmap(Request $request)
@@ -340,16 +358,16 @@ class DashboardController extends Controller
             'total_submissions' => array_sum(array_column($heatmapData, 'count')),
         ]);
     }
-    
+
     /**
      * Helper untuk mendapatkan label action berdasarkan status
-     * 
-     * @param string $status Status penelitian/pengabdian
+     *
+     * @param  string  $status  Status penelitian/pengabdian
      * @return string Label action yang user-friendly
      */
     private function getActionFromStatus($status)
     {
-        return match($status) {
+        return match ($status) {
             'lolos' => 'Menyetujui',
             'tidak_lolos' => 'Menolak',
             'lolos_perlu_revisi' => 'Meminta Revisi',

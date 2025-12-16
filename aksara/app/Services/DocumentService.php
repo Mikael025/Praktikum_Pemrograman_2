@@ -2,28 +2,33 @@
 
 namespace App\Services;
 
-use Illuminate\Http\UploadedFile;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 use App\Exceptions\DocumentUploadException;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Service untuk menangani document upload dan management
  * Centralized logic untuk file handling penelitian dan pengabdian
- * 
- * @package App\Services
+ *
+ * TODO: Implement CDN integration untuk production (Amazon S3, Cloudflare, dll)
+ *       untuk optimasi storage dan delivery dokumen berukuran besar
+ *
+ * TODO: Tambahkan virus scanning untuk uploaded files (ClamAV integration)
+ *       untuk meningkatkan security
  */
 class DocumentService
 {
     /**
      * Upload document dan create database record
-     * 
-     * @param UploadedFile $file File yang akan diupload
-     * @param Model $parent Parent model (Penelitian atau Pengabdian)
-     * @param string $documentType Jenis dokumen (proposal, laporan_akhir, dokumen_pendukung)
-     * @param string $disk Storage disk (default: public)
+     *
+     * @param  UploadedFile  $file  File yang akan diupload
+     * @param  Model  $parent  Parent model (Penelitian atau Pengabdian)
+     * @param  string  $documentType  Jenis dokumen (proposal, laporan_akhir, dokumen_pendukung)
+     * @param  string  $disk  Storage disk (default: public)
      * @return Model Document model yang telah dibuat
+     *
      * @throws DocumentUploadException Jika upload gagal
      */
     public function uploadDocument(
@@ -40,7 +45,7 @@ class DocumentService
             // Store file ke storage
             $path = $file->store($storagePath, $disk);
 
-            if (!$path) {
+            if (! $path) {
                 throw new DocumentUploadException('Gagal menyimpan file ke storage.');
             }
 
@@ -79,17 +84,17 @@ class DocumentService
             ]);
 
             throw new DocumentUploadException(
-                'Gagal mengupload dokumen: ' . $e->getMessage()
+                'Gagal mengupload dokumen: '.$e->getMessage()
             );
         }
     }
 
     /**
      * Upload multiple documents sekaligus
-     * 
-     * @param array $files Array of UploadedFile
-     * @param Model $parent Parent model
-     * @param string $documentType Jenis dokumen
+     *
+     * @param  array  $files  Array of UploadedFile
+     * @param  Model  $parent  Parent model
+     * @param  string  $documentType  Jenis dokumen
      * @return array Array of uploaded document models
      */
     public function uploadMultipleDocuments(
@@ -117,9 +122,9 @@ class DocumentService
 
     /**
      * Delete document dari storage dan database
-     * 
-     * @param Model $document Document model yang akan dihapus
-     * @param string $disk Storage disk (default: public)
+     *
+     * @param  Model  $document  Document model yang akan dihapus
+     * @param  string  $disk  Storage disk (default: public)
      * @return bool Success status
      */
     public function deleteDocument(Model $document, string $disk = 'public'): bool
@@ -153,11 +158,12 @@ class DocumentService
 
     /**
      * Replace existing document dengan file baru
-     * 
-     * @param Model $document Existing document model
-     * @param UploadedFile $newFile New file yang akan diupload
-     * @param string $disk Storage disk
+     *
+     * @param  Model  $document  Existing document model
+     * @param  UploadedFile  $newFile  New file yang akan diupload
+     * @param  string  $disk  Storage disk
      * @return Model Updated document model
+     *
      * @throws DocumentUploadException
      */
     public function replaceDocument(
@@ -179,7 +185,7 @@ class DocumentService
             // Upload new file
             $path = $newFile->store($storagePath, $disk);
 
-            if (!$path) {
+            if (! $path) {
                 throw new DocumentUploadException('Gagal menyimpan file baru ke storage.');
             }
 
@@ -207,29 +213,30 @@ class DocumentService
             ]);
 
             throw new DocumentUploadException(
-                'Gagal mengganti dokumen: ' . $e->getMessage()
+                'Gagal mengganti dokumen: '.$e->getMessage()
             );
         }
     }
 
     /**
      * Get document download URL
-     * 
-     * @param Model $document Document model
-     * @param string $disk Storage disk
+     *
+     * @param  Model  $document  Document model
+     * @param  string  $disk  Storage disk
      * @return string|null Download URL or null if file not exists
      */
     public function getDocumentUrl(Model $document, string $disk = 'public'): ?string
     {
-        if (!$document->path_file) {
+        if (! $document->path_file) {
             return null;
         }
 
-        if (!Storage::disk($disk)->exists($document->path_file)) {
+        if (! Storage::disk($disk)->exists($document->path_file)) {
             Log::warning('Document file not found', [
                 'document_id' => $document->id,
                 'path' => $document->path_file,
             ]);
+
             return null;
         }
 
@@ -238,20 +245,20 @@ class DocumentService
 
     /**
      * Get document model class berdasarkan parent model
-     * 
-     * @param Model $parent Parent model
+     *
+     * @param  Model  $parent  Parent model
      * @return string Document model class name
      */
     private function getDocumentModelClass(Model $parent): string
     {
         $parentClass = class_basename($parent);
-        
+
         $documentClasses = [
             'Penelitian' => \App\Models\PenelitianDocument::class,
             'Pengabdian' => \App\Models\PengabdianDocument::class,
         ];
 
-        if (!isset($documentClasses[$parentClass])) {
+        if (! isset($documentClasses[$parentClass])) {
             throw new \InvalidArgumentException(
                 "Unsupported parent model type: {$parentClass}"
             );
@@ -262,20 +269,21 @@ class DocumentService
 
     /**
      * Get foreign key name berdasarkan parent model
-     * 
-     * @param Model $parent Parent model
+     *
+     * @param  Model  $parent  Parent model
      * @return string Foreign key name
      */
     private function getForeignKeyName(Model $parent): string
     {
         $parentClass = strtolower(class_basename($parent));
+
         return "{$parentClass}_id";
     }
 
     /**
      * Get parent ID dari document model
-     * 
-     * @param Model $document Document model
+     *
+     * @param  Model  $document  Document model
      * @return int Parent ID
      */
     private function getParentIdFromDocument(Model $document): int
@@ -283,7 +291,7 @@ class DocumentService
         if (isset($document->penelitian_id)) {
             return $document->penelitian_id;
         }
-        
+
         if (isset($document->pengabdian_id)) {
             return $document->pengabdian_id;
         }
@@ -293,8 +301,8 @@ class DocumentService
 
     /**
      * Get model type dari document model
-     * 
-     * @param Model $document Document model
+     *
+     * @param  Model  $document  Document model
      * @return string Model type (penelitian/pengabdian)
      */
     private function getModelTypeFromDocument(Model $document): string
@@ -302,7 +310,7 @@ class DocumentService
         if (isset($document->penelitian_id)) {
             return 'penelitian';
         }
-        
+
         if (isset($document->pengabdian_id)) {
             return 'pengabdian';
         }
@@ -312,23 +320,23 @@ class DocumentService
 
     /**
      * Get file size in human readable format
-     * 
-     * @param int $bytes File size in bytes
+     *
+     * @param  int  $bytes  File size in bytes
      * @return string Formatted file size
      */
     public function formatFileSize(int $bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB'];
         $factor = floor((strlen($bytes) - 1) / 3);
-        
-        return sprintf("%.2f %s", $bytes / pow(1024, $factor), $units[$factor]);
+
+        return sprintf('%.2f %s', $bytes / pow(1024, $factor), $units[$factor]);
     }
 
     /**
      * Validate file type
-     * 
-     * @param UploadedFile $file File yang akan divalidasi
-     * @param array $allowedMimes Allowed MIME types
+     *
+     * @param  UploadedFile  $file  File yang akan divalidasi
+     * @param  array  $allowedMimes  Allowed MIME types
      * @return bool Validation result
      */
     public function validateFileType(UploadedFile $file, array $allowedMimes): bool
@@ -338,7 +346,7 @@ class DocumentService
 
     /**
      * Get allowed MIME types untuk dokumen akademik
-     * 
+     *
      * @return array Allowed MIME types
      */
     public function getAllowedMimeTypes(): array

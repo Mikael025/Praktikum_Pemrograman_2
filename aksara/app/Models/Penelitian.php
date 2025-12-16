@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+// TODO: Tambahkan database indexes untuk kolom yang sering di-query:
+//       - status (untuk filter)
+//       - tahun (untuk filter tahunan)
+//       - user_id (sudah ada foreign key, tapi bisa dioptimalkan)
+//       Migration: $table->index(['status', 'tahun']); untuk composite index
 class Penelitian extends Model
 {
     protected $table = 'penelitian';
-    
+
     protected $fillable = [
         'user_id',
         'judul',
@@ -78,20 +83,41 @@ class Penelitian extends Model
     public function getRequiredDocuments(): array
     {
         $required = [];
-        
+
         if ($this->requiresProposal()) {
             $required[] = 'proposal';
         }
-        
+
         if ($this->requiresFinalDocuments()) {
             $required[] = 'laporan_akhir';
         }
-        
+
         return $required;
     }
 
     /**
-     * Check if status transition is valid
+     * Mengecek apakah transisi status valid sesuai workflow penelitian
+     *
+     * Workflow penelitian:
+     * - diusulkan → tidak_lolos / lolos_perlu_revisi / lolos
+     * - lolos_perlu_revisi → lolos
+     * - lolos → revisi_pra_final / selesai
+     * - revisi_pra_final → selesai
+     * - tidak_lolos & selesai: status terminal (tidak bisa diubah)
+     *
+     * @param  string  $newStatus  Status tujuan yang ingin dicapai
+     * @return bool True jika transisi valid, false jika tidak
+     *
+     * @example
+     * $penelitian = Penelitian::find(1);
+     * $penelitian->status = 'diusulkan';
+     * $penelitian->canTransitionTo('lolos'); // true
+     * $penelitian->canTransitionTo('selesai'); // false (harus melalui lolos dulu)
+     * @example
+     * // Validasi sebelum update status
+     * if (!$penelitian->canTransitionTo('lolos')) {
+     *     throw new InvalidStatusTransitionException($penelitian->status, 'lolos');
+     * }
      */
     public function canTransitionTo(string $newStatus): bool
     {
@@ -114,12 +140,31 @@ class Penelitian extends Model
     {
         $required = $this->getRequiredDocuments();
         $existing = $this->documents()->pluck('jenis_dokumen')->toArray();
-        
+
         return empty(array_diff($required, $existing));
     }
 
     /**
-     * Calculate completion progress percentage
+     * Menghitung persentase progress penyelesaian penelitian
+     *
+     * Progress dihitung berdasarkan 3 komponen dengan bobot:
+     * - Status penelitian (40%): semakin maju statusnya, semakin tinggi skornya
+     * - Kelengkapan dokumen (40%): proposal, laporan akhir, dokumen pendukung
+     * - Feedback/catatan verifikasi (20%): ada tidaknya catatan dari admin
+     *
+     * @return array Associative array dengan keys:
+     *               - 'total' (int): Total progress 0-100%
+     *               - 'status' (int): Score status 0-100%
+     *               - 'documents' (int): Score dokumen 0-100%
+     *               - 'feedback' (int): Score feedback 0-100%
+     *
+     * @example
+     * $penelitian = Penelitian::find(1);
+     * $progress = $penelitian->calculateProgress();
+     * // Returns: ['total' => 65, 'status' => 70, 'documents' => 50, 'feedback' => 75]
+     * @example
+     * // Menampilkan progress bar di view
+     * <div class="progress-bar" style="width: {{ $penelitian->calculateProgress()['total'] }}%"></div>
      */
     public function calculateProgress(): array
     {
@@ -187,13 +232,13 @@ class Penelitian extends Model
     private function getFeedbackScore(): int
     {
         // If no feedback required, full score
-        if (!in_array($this->status, ['lolos_perlu_revisi', 'revisi_pra_final'])) {
+        if (! in_array($this->status, ['lolos_perlu_revisi', 'revisi_pra_final'])) {
             return 100;
         }
 
         // Check if documents uploaded after feedback
         $lastStatusChange = $this->statusHistory()->first();
-        if (!$lastStatusChange) {
+        if (! $lastStatusChange) {
             return 50; // No history, assume partially addressed
         }
 

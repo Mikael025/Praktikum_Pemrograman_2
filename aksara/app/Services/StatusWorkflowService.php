@@ -2,30 +2,31 @@
 
 namespace App\Services;
 
+use App\Exceptions\InvalidStatusTransitionException;
+// FIXME: Implement interface untuk service layer
+//        Create StatusWorkflowServiceInterface untuk Dependency Inversion Principle
+//        Ini akan memudahkan testing dan allow multiple implementations
+use App\Exceptions\WorkflowException;
+use App\Models\StatusHistory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\StatusHistory;
-use App\Exceptions\InvalidStatusTransitionException;
-use App\Exceptions\WorkflowException;
 
 /**
  * Service untuk menangani workflow status transition
  * Centralized logic untuk status change penelitian dan pengabdian
- * 
- * @package App\Services
  */
 class StatusWorkflowService
 {
     /**
      * Transition model status dengan validation dan audit trail
-     * 
-     * @param Model $model Model yang akan diubah statusnya (Penelitian atau Pengabdian)
-     * @param string $targetStatus Status tujuan
-     * @param string|null $notes Catatan verifikasi
-     * @param int|null $changedBy User ID yang mengubah status (default: Auth user)
-     * @return void
+     *
+     * @param  Model  $model  Model yang akan diubah statusnya (Penelitian atau Pengabdian)
+     * @param  string  $targetStatus  Status tujuan
+     * @param  string|null  $notes  Catatan verifikasi
+     * @param  int|null  $changedBy  User ID yang mengubah status (default: Auth user)
+     *
      * @throws InvalidStatusTransitionException Jika transisi tidak valid
      * @throws WorkflowException Jika terjadi error workflow lainnya
      */
@@ -36,7 +37,7 @@ class StatusWorkflowService
         ?int $changedBy = null
     ): void {
         // Validate status transition menggunakan model's business logic
-        if (!method_exists($model, 'canTransitionTo') || !$model->canTransitionTo($targetStatus)) {
+        if (! method_exists($model, 'canTransitionTo') || ! $model->canTransitionTo($targetStatus)) {
             throw new InvalidStatusTransitionException($model->status, $targetStatus);
         }
 
@@ -75,7 +76,7 @@ class StatusWorkflowService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             // Log error untuk debugging
             Log::error('Status transition failed', [
                 'model_type' => class_basename($model),
@@ -92,10 +93,9 @@ class StatusWorkflowService
     /**
      * Update catatan verifikasi tanpa mengubah status
      * Untuk memberikan feedback tambahan pada status yang sama
-     * 
-     * @param Model $model Model yang akan diupdate catatannya
-     * @param string $notes Catatan verifikasi baru
-     * @return void
+     *
+     * @param  Model  $model  Model yang akan diupdate catatannya
+     * @param  string  $notes  Catatan verifikasi baru
      */
     public function updateNotes(Model $model, string $notes): void
     {
@@ -121,7 +121,7 @@ class StatusWorkflowService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Update notes failed', [
                 'model_type' => class_basename($model),
                 'model_id' => $model->id,
@@ -134,8 +134,8 @@ class StatusWorkflowService
 
     /**
      * Get default notes untuk status tertentu jika tidak disediakan
-     * 
-     * @param string $status Status yang akan diset
+     *
+     * @param  string  $status  Status yang akan diset
      * @return string Default notes
      */
     private function getDefaultNotes(string $status): string
@@ -154,9 +154,9 @@ class StatusWorkflowService
     /**
      * Get success message berdasarkan status
      * Helper untuk standardize success messages di controllers
-     * 
-     * @param string $status Status yang baru diset
-     * @param string $modelType Tipe model (Penelitian/Pengabdian)
+     *
+     * @param  string  $status  Status yang baru diset
+     * @param  string  $modelType  Tipe model (Penelitian/Pengabdian)
      * @return string Success message
      */
     public function getSuccessMessage(string $status, string $modelType = 'Penelitian'): string
@@ -169,16 +169,16 @@ class StatusWorkflowService
             'selesai' => "$modelType berhasil diselesaikan.",
         ];
 
-        return $messages[$status] ?? "$modelType berhasil diubah ke status " . str_replace('_', ' ', $status) . ".";
+        return $messages[$status] ?? "$modelType berhasil diubah ke status ".str_replace('_', ' ', $status).'.';
     }
 
     /**
      * Batch transition untuk multiple models sekaligus
      * Useful untuk bulk operations di admin panel
-     * 
-     * @param array $models Array of models
-     * @param string $targetStatus Status tujuan
-     * @param string|null $notes Catatan verifikasi
+     *
+     * @param  array  $models  Array of models
+     * @param  string  $targetStatus  Status tujuan
+     * @param  string|null  $notes  Catatan verifikasi
      * @return array ['success' => int, 'failed' => int, 'errors' => array]
      */
     public function batchTransition(array $models, string $targetStatus, ?string $notes = null): array

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Pengabdian extends Model
 {
     protected $table = 'pengabdian';
-    
+
     protected $fillable = [
         'user_id',
         'judul',
@@ -79,20 +79,41 @@ class Pengabdian extends Model
     public function getRequiredDocuments(): array
     {
         $required = [];
-        
+
         if ($this->requiresProposal()) {
             $required[] = 'proposal';
         }
-        
+
         if ($this->requiresFinalDocuments()) {
             $required[] = 'laporan_akhir';
         }
-        
+
         return $required;
     }
 
     /**
-     * Check if status transition is valid
+     * Mengecek apakah transisi status valid sesuai workflow pengabdian
+     *
+     * Workflow pengabdian (sama dengan penelitian):
+     * - diusulkan → tidak_lolos / lolos_perlu_revisi / lolos
+     * - lolos_perlu_revisi → lolos
+     * - lolos → revisi_pra_final / selesai
+     * - revisi_pra_final → selesai
+     * - tidak_lolos & selesai: status terminal (tidak bisa diubah)
+     *
+     * @param  string  $newStatus  Status tujuan yang ingin dicapai
+     * @return bool True jika transisi valid, false jika tidak
+     *
+     * @example
+     * $pengabdian = Pengabdian::find(1);
+     * if ($pengabdian->canTransitionTo('lolos_perlu_revisi')) {
+     *     $workflowService->transitionStatus($pengabdian, 'lolos_perlu_revisi', $catatan);
+     * }
+     * @example
+     * // Validasi di controller sebelum update
+     * if (!$pengabdian->canTransitionTo($request->new_status)) {
+     *     return back()->with('error', 'Transisi status tidak valid');
+     * }
      */
     public function canTransitionTo(string $newStatus): bool
     {
@@ -115,12 +136,37 @@ class Pengabdian extends Model
     {
         $required = $this->getRequiredDocuments();
         $existing = $this->documents()->pluck('jenis_dokumen')->toArray();
-        
+
         return empty(array_diff($required, $existing));
     }
 
     /**
-     * Calculate completion progress percentage
+     * Menghitung persentase progress penyelesaian pengabdian
+     *
+     * Progress dihitung berdasarkan 3 komponen dengan bobot:
+     * - Status pengabdian (40%): semakin maju statusnya, semakin tinggi skornya
+     * - Kelengkapan dokumen (40%): proposal, laporan akhir, dokumen pendukung
+     * - Feedback/catatan verifikasi (20%): ada tidaknya catatan dari admin
+     *
+     * @return array Associative array dengan keys:
+     *               - 'total' (int): Total progress 0-100%
+     *               - 'status' (int): Score status 0-100%
+     *               - 'documents' (int): Score dokumen 0-100%
+     *               - 'feedback' (int): Score feedback 0-100%
+     *
+     * @example
+     * $pengabdian = Pengabdian::find(1);
+     * $progress = $pengabdian->calculateProgress();
+     * echo "Progress: {$progress['total']}%"; // "Progress: 72%"
+     * @example
+     * // Digunakan di dashboard untuk tracking progress
+     *
+     * @foreach($pengabdianList as $item)
+     *
+     *     @php $prog = $item->calculateProgress(); @endphp
+     *     <div>{{ $prog['total'] }}% complete</div>
+     *
+     * @endforeach
      */
     public function calculateProgress(): array
     {
@@ -183,12 +229,12 @@ class Pengabdian extends Model
      */
     private function getFeedbackScore(): int
     {
-        if (!in_array($this->status, ['lolos_perlu_revisi', 'revisi_pra_final'])) {
+        if (! in_array($this->status, ['lolos_perlu_revisi', 'revisi_pra_final'])) {
             return 100;
         }
 
         $lastStatusChange = $this->statusHistory()->first();
-        if (!$lastStatusChange) {
+        if (! $lastStatusChange) {
             return 50;
         }
 
